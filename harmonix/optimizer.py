@@ -1,0 +1,595 @@
+"""
+optimizer.py
+============
+Harmony Search optimisers: Minimization, Maximization, MultiObjective.
+
+References
+----------
+Geem, Z. W., Kim, J. H., & Loganathan, G. V. (2001).
+    A new heuristic optimization algorithm: Harmony search.
+    *Simulation*, 76(2), 60–68.
+
+Lee, K. S., & Geem, Z. W. (2005).
+    A new meta-heuristic algorithm for continuous engineering optimization.
+    *Computer Methods in Applied Mechanics and Engineering*, 194(36–38), 3902–3933.
+
+Ricart, J., Hüttemann, G., Lima, J., & Barán, B. (2011).
+    Multiobjective harmony search algorithm proposals.
+    *Electronic Notes in Theoretical Computer Science*, 281, 51–67.
+"""
+
+from __future__ import annotations
+
+import json
+import random
+import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from .space  import DesignSpace
+from .pareto import ParetoArchive, ParetoResult
+
+# ---------------------------------------------------------------------------
+# Type aliases
+# ---------------------------------------------------------------------------
+
+Harmony  = Dict[str, Any]
+Fitness  = float
+Penalty  = float
+
+
+# ---------------------------------------------------------------------------
+# Result container
+# ---------------------------------------------------------------------------
+
+@dataclass
+class OptimizationResult:
+    """
+    Result of a single-objective optimisation run.
+
+    Attributes
+    ----------
+    best_harmony : dict
+    best_fitness : float
+    best_penalty : float
+    iterations : int
+    elapsed_seconds : float
+    history : list of (fitness, penalty)
+        Best recorded at each iteration.
+    """
+    best_harmony:    Harmony
+    best_fitness:    Fitness
+    best_penalty:    Penalty
+    iterations:      int
+    elapsed_seconds: float
+    history: List[Tuple[Fitness, Penalty]] = field(default_factory=list)
+
+    def __repr__(self) -> str:
+        lines = [
+            "OptimizationResult(",
+            f"  best_fitness  = {self.best_fitness:.6g}",
+            f"  best_penalty  = {self.best_penalty:.6g}",
+            f"  iterations    = {self.iterations}",
+            f"  elapsed       = {self.elapsed_seconds:.2f}s",
+            "  best_harmony  = {",
+        ]
+        for k, v in self.best_harmony.items():
+            lines.append(f"    {k!r}: {v!r},")
+        lines += ["  }", ")"]
+        return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Harmony memory
+# ---------------------------------------------------------------------------
+
+class HarmonyMemory:
+    """
+    Fixed-size pool of harmonies with Deb-style constraint handling.
+
+    Replacement policy
+    ~~~~~~~~~~~~~~~~~~
+    1. Feasible candidate replaces any infeasible worst.
+    2. Among infeasible: smaller penalty wins.
+    3. Among feasible: smaller (min) or larger (max) fitness wins.
+    """
+
+    def __init__(self, size: int, mode: str = "min"):
+        self.size  = size
+        self.mode  = mode
+        self._harmonies: List[Harmony] = []
+        self._fitness:   List[Fitness] = []
+        self._penalty:   List[Penalty] = []
+
+    @property
+    def harmonies(self) -> List[Harmony]:
+        return self._harmonies
+
+    def __len__(self) -> int:
+        return len(self._harmonies)
+
+    def add(self, harmony: Harmony, fitness: Fitness, penalty: Penalty) -> None:
+        self._harmonies.append(harmony)
+        self._fitness.append(fitness)
+        self._penalty.append(penalty)
+
+    def _dominates(self, idx_a: int, idx_b: int) -> bool:
+        """True when solution *a* is strictly better than *b*."""
+        pa, pb = self._penalty[idx_a], self._penalty[idx_b]
+        fa, fb = self._fitness[idx_a], self._fitness[idx_b]
+        if pa <= 0 and pb > 0:   return True
+        if pa > 0  and pb <= 0:  return False
+        if pa > 0  and pb > 0:   return pa < pb
+        return fa < fb if self.mode == "min" else fa > fb
+
+    def best_index(self) -> int:
+        best = 0
+        for i in range(1, len(self._harmonies)):
+            if self._dominates(i, best):
+                best = i
+        return best
+
+    def worst_index(self) -> int:
+        worst = 0
+        for i in range(1, len(self._harmonies)):
+            if self._dominates(worst, i):
+                worst = i
+        return worst
+
+    def best(self) -> Tuple[Harmony, Fitness, Penalty]:
+        idx = self.best_index()
+        return self._harmonies[idx], self._fitness[idx], self._penalty[idx]
+
+    def try_replace_worst(
+        self, harmony: Harmony, fitness: Fitness, penalty: Penalty
+    ) -> bool:
+        """Replace worst if candidate dominates it.  Returns True on success."""
+        w  = self.worst_index()
+        pw = self._penalty[w]
+        fw = self._fitness[w]
+        if   penalty <= 0 and pw > 0:   replace = True
+        elif penalty > 0  and pw <= 0:  replace = False
+        elif penalty > 0  and pw > 0:   replace = penalty < pw
+        else:                            replace = fitness < fw if self.mode == "min" else fitness > fw
+        if replace:
+            self._harmonies[w] = harmony
+            self._fitness[w]   = fitness
+            self._penalty[w]   = penalty
+        return replace
+
+    # --- serialisation -----------------------------------------------------
+
+    def to_dict(self) -> dict:
+        return {
+            "size":      self.size,
+            "mode":      self.mode,
+            "harmonies": self._harmonies,
+            "fitness":   self._fitness,
+            "penalty":   self._penalty,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "HarmonyMemory":
+        mem = cls(size=data["size"], mode=data["mode"])
+        mem._harmonies = data["harmonies"]
+        mem._fitness   = data["fitness"]
+        mem._penalty   = data["penalty"]
+        return mem
+
+
+# ---------------------------------------------------------------------------
+# Base optimiser
+# ---------------------------------------------------------------------------
+
+class HarmonySearchOptimizer(ABC):
+    """Abstract base for all Harmony Search optimisers."""
+
+    def __init__(self, space: DesignSpace, objective: Callable):
+        self.space     = space
+        self.objective = objective
+        self._memory: Optional[HarmonyMemory] = None
+
+    # --- core HS operators -------------------------------------------------
+
+    def _improvise(self, hmcr: float, par: float) -> Harmony:
+        """
+        Single improvisation step (all variables, in definition order).
+
+        For each variable:
+        1. With probability HMCR — memory consideration:
+           collect values from memory → filter to context-feasible ones
+           → pick one → with probability PAR apply pitch adjustment.
+        2. With probability (1 − HMCR) — random selection.
+        """
+        ctx: Harmony = {}
+        for name, var in self.space.items():
+            if random.random() < hmcr:
+                candidates = [h[name] for h in self._memory.harmonies]
+                valid      = var.filter(candidates, ctx=ctx)
+                if valid:
+                    base = random.choice(valid)
+                    ctx[name] = (
+                        var.neighbor(base, ctx=ctx)
+                        if random.random() < par
+                        else base
+                    )
+                    continue
+            # Random selection (fallback when HMCR misses or no valid candidates)
+            ctx[name] = var.sample(ctx=ctx)
+        return ctx
+
+    def _improvise_from_archive(
+        self, hmcr: float, par: float, archive: ParetoArchive
+    ) -> Harmony:
+        """
+        Improvisation that draws base values from the Pareto archive.
+
+        Values are filtered to those that are context-feasible at each step,
+        exactly as in :meth:`_improvise`.  If no archive value survives the
+        filter, falls back to a fresh sample.
+        """
+        ctx: Harmony = {}
+        for name, var in self.space.items():
+            if random.random() < hmcr and archive.entries:
+                archive_values = [e.harmony[name] for e in archive.entries]
+                valid = var.filter(archive_values, ctx=ctx)
+                if valid:
+                    base = random.choice(valid)
+                    ctx[name] = (
+                        var.neighbor(base, ctx=ctx)
+                        if random.random() < par
+                        else base
+                    )
+                    continue
+            ctx[name] = var.sample(ctx=ctx)
+        return ctx
+
+    # --- checkpoint --------------------------------------------------------
+
+    def save_checkpoint(self, path: Path, iteration: int) -> None:
+        """Serialise memory and iteration counter to a JSON file."""
+        payload = {
+            "iteration": iteration,
+            "memory":    self._memory.to_dict() if self._memory else None,
+        }
+        Path(path).write_text(json.dumps(payload, indent=2))
+
+    def load_checkpoint(self, path: Path) -> int:
+        """Restore memory from JSON checkpoint.  Returns last completed iteration."""
+        payload      = json.loads(Path(path).read_text())
+        self._memory = HarmonyMemory.from_dict(payload["memory"])
+        return int(payload["iteration"])
+
+    @abstractmethod
+    def optimize(self, **kwargs): ...
+
+
+# ---------------------------------------------------------------------------
+# Minimization
+# ---------------------------------------------------------------------------
+
+class Minimization(HarmonySearchOptimizer):
+    """
+    Single-objective Harmony Search minimiser.
+
+    Parameters
+    ----------
+    space : DesignSpace
+    objective : callable
+        ``objective(harmony) -> (fitness: float, penalty: float)``
+
+        *penalty* ≤ 0 means feasible.
+
+    Examples
+    --------
+    >>> opt = Minimization(space, objective)
+    >>> result = opt.optimize(memory_size=20, hmcr=0.85, par=0.35, max_iter=5000)
+    >>> print(result.best_fitness)
+    """
+
+    def optimize(
+        self,
+        *,
+        memory_size:      int   = 20,
+        hmcr:             float = 0.85,
+        par:              float = 0.35,
+        max_iter:         int   = 5000,
+        callback:         Optional[Callable[[int, OptimizationResult], None]] = None,
+        checkpoint_path:  Optional[Path] = None,
+        checkpoint_every: int   = 500,
+        verbose:          bool  = False,
+    ) -> OptimizationResult:
+        """
+        Run the minimisation loop.
+
+        Parameters
+        ----------
+        memory_size : int
+            Harmony Memory Size (HMS).
+        hmcr : float
+            Harmony Memory Considering Rate ∈ (0, 1).
+        par : float
+            Pitch Adjusting Rate ∈ (0, 1).
+        max_iter : int
+            Total improvisation steps.
+        callback : callable, optional
+            ``callback(iteration, partial_result)``
+            Raise :exc:`StopIteration` inside the callback for early exit.
+        checkpoint_path : Path, optional
+            JSON file for crash recovery.  Resumed automatically on restart.
+        checkpoint_every : int
+            Checkpoint save frequency (iterations).
+        verbose : bool
+            Print per-iteration summary to stdout.
+        """
+        start_iter = 0
+        if checkpoint_path and Path(checkpoint_path).exists():
+            start_iter = self.load_checkpoint(Path(checkpoint_path))
+            if verbose:
+                print(f"[HS] Resumed from checkpoint at iteration {start_iter}.")
+        else:
+            self._memory = HarmonyMemory(size=memory_size, mode="min")
+            for _ in range(memory_size):
+                h = self.space.sample_harmony()
+                f, p = self.objective(h)
+                self._memory.add(h, float(f), float(p))
+
+        history: List[Tuple[Fitness, Penalty]] = []
+        t0 = time.perf_counter()
+
+        try:
+            for it in range(start_iter, max_iter):
+                new_h        = self._improvise(hmcr, par)
+                new_f, new_p = self.objective(new_h)
+                self._memory.try_replace_worst(new_h, float(new_f), float(new_p))
+
+                best_h, best_f, best_p = self._memory.best()
+                history.append((best_f, best_p))
+
+                if verbose:
+                    print(
+                        f"[HS] iter {it + 1:>6d} | "
+                        f"fitness = {best_f:.6g} | "
+                        f"penalty = {best_p:.4g}"
+                    )
+
+                if callback is not None:
+                    partial = OptimizationResult(
+                        best_harmony=best_h, best_fitness=best_f,
+                        best_penalty=best_p, iterations=it + 1,
+                        elapsed_seconds=time.perf_counter() - t0,
+                        history=history,
+                    )
+                    callback(it + 1, partial)
+
+                if checkpoint_path and (it + 1) % checkpoint_every == 0:
+                    self.save_checkpoint(Path(checkpoint_path), it + 1)
+
+        except StopIteration:
+            pass
+
+        elapsed = time.perf_counter() - t0
+        best_h, best_f, best_p = self._memory.best()
+        return OptimizationResult(
+            best_harmony=best_h, best_fitness=best_f, best_penalty=best_p,
+            iterations=len(history), elapsed_seconds=elapsed, history=history,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Maximization
+# ---------------------------------------------------------------------------
+
+class Maximization(HarmonySearchOptimizer):
+    """
+    Single-objective Harmony Search maximiser.
+
+    Internally negates fitness for memory bookkeeping; the reported
+    ``best_fitness`` is always the original (un-negated) value.
+
+    Parameters
+    ----------
+    space : DesignSpace
+    objective : callable
+        ``objective(harmony) -> (fitness: float, penalty: float)``
+    """
+
+    def optimize(
+        self,
+        *,
+        memory_size:      int   = 20,
+        hmcr:             float = 0.85,
+        par:              float = 0.35,
+        max_iter:         int   = 5000,
+        callback:         Optional[Callable[[int, OptimizationResult], None]] = None,
+        checkpoint_path:  Optional[Path] = None,
+        checkpoint_every: int   = 500,
+        verbose:          bool  = False,
+    ) -> OptimizationResult:
+        """Run maximisation (see :meth:`Minimization.optimize` for parameter docs)."""
+
+        # Wrap callback to restore the sign before forwarding
+        wrapped_callback = None
+        if callback is not None:
+            def wrapped_callback(it, partial):
+                restored = OptimizationResult(
+                    best_harmony    = partial.best_harmony,
+                    best_fitness    = -partial.best_fitness,
+                    best_penalty    = partial.best_penalty,
+                    iterations      = partial.iterations,
+                    elapsed_seconds = partial.elapsed_seconds,
+                    history         = [(-f, p) for f, p in partial.history],
+                )
+                callback(it, restored)
+
+        def _negated(harmony):
+            f, p = self.objective(harmony)
+            return -float(f), float(p)
+
+        inner = Minimization(self.space, _negated)
+        result = inner.optimize(
+            memory_size=memory_size, hmcr=hmcr, par=par,
+            max_iter=max_iter,
+            callback=wrapped_callback,
+            checkpoint_path=checkpoint_path,
+            checkpoint_every=checkpoint_every,
+            verbose=verbose,
+        )
+        self._memory = inner._memory
+
+        return OptimizationResult(
+            best_harmony    = result.best_harmony,
+            best_fitness    = -result.best_fitness,
+            best_penalty    = result.best_penalty,
+            iterations      = result.iterations,
+            elapsed_seconds = result.elapsed_seconds,
+            history         = [(-f, p) for f, p in result.history],
+        )
+
+
+# ---------------------------------------------------------------------------
+# MultiObjective
+# ---------------------------------------------------------------------------
+
+class MultiObjective(HarmonySearchOptimizer):
+    """
+    Multi-objective Harmony Search with Pareto archive.
+
+    Maintains a bounded archive of non-dominated solutions.  New harmonies
+    are improvised using archive entries (crowding-distance tournament),
+    driving the search toward the Pareto front while preserving diversity.
+
+    Constraint handling
+    ~~~~~~~~~~~~~~~~~~~
+    Only feasible harmonies (penalty ≤ 0) enter the archive.
+    Infeasible harmonies remain in working memory so the search can learn
+    from near-feasible regions.
+
+    Parameters
+    ----------
+    space : DesignSpace
+    objective : callable
+        ``objective(harmony) -> (objectives: tuple[float, ...], penalty: float)``
+
+        All objectives are minimised.  Negate maximised objectives inside
+        the callable.
+
+    Examples
+    --------
+    >>> def bi_obj(h):
+    ...     f1 = h["x"]**2 + h["y"]**2
+    ...     f2 = (h["x"] - 2)**2 + (h["y"] - 2)**2
+    ...     return (f1, f2), 0.0
+    >>>
+    >>> result = MultiObjective(space, bi_obj).optimize(max_iter=5000)
+    >>> for e in result.front[:3]:
+    ...     print(e.objectives)
+    """
+
+    def optimize(
+        self,
+        *,
+        memory_size:      int   = 30,
+        hmcr:             float = 0.85,
+        par:              float = 0.35,
+        max_iter:         int   = 5000,
+        archive_size:     int   = 100,
+        callback:         Optional[Callable[[int, ParetoResult], None]] = None,
+        checkpoint_path:  Optional[Path] = None,
+        checkpoint_every: int   = 500,
+        verbose:          bool  = False,
+    ) -> ParetoResult:
+        """
+        Run the multi-objective loop.
+
+        Parameters
+        ----------
+        memory_size : int
+            HMS for the working population.
+        hmcr, par : float
+            Standard HS parameters.
+        max_iter : int
+            Improvisation steps.
+        archive_size : int
+            Maximum Pareto archive capacity (pruned by crowding distance).
+        callback : callable, optional
+            ``callback(iteration, partial: ParetoResult)``
+        checkpoint_path, checkpoint_every : optional
+            JSON crash-recovery.
+        verbose : bool
+        """
+        archive    = ParetoArchive(max_size=archive_size)
+        start_iter = 0
+
+        if checkpoint_path and Path(checkpoint_path).exists():
+            payload      = json.loads(Path(checkpoint_path).read_text())
+            start_iter   = int(payload["iteration"])
+            self._memory = HarmonyMemory.from_dict(payload["memory"])
+            archive      = ParetoArchive.from_dict(payload["archive"])
+            if verbose:
+                print(f"[MO-HS] Resumed from checkpoint at iteration {start_iter}.")
+        else:
+            self._memory = HarmonyMemory(size=memory_size, mode="min")
+            for _ in range(memory_size):
+                h       = self.space.sample_harmony()
+                objs, p = self.objective(h)
+                objs    = tuple(float(v) for v in objs)
+                p       = float(p)
+                self._memory.add(h, objs[0], p)
+                if p <= 0:
+                    archive.add(h, objs)
+
+        archive_history: List[int] = []
+        t0 = time.perf_counter()
+
+        try:
+            for it in range(start_iter, max_iter):
+                if archive.entries:
+                    new_h = self._improvise_from_archive(hmcr, par, archive)
+                else:
+                    new_h = self._improvise(hmcr, par)
+
+                objs, p = self.objective(new_h)
+                objs    = tuple(float(v) for v in objs)
+                p       = float(p)
+
+                self._memory.try_replace_worst(new_h, objs[0], p)
+                if p <= 0:
+                    archive.add(new_h, objs)
+
+                archive_history.append(len(archive))
+
+                if verbose:
+                    print(
+                        f"[MO-HS] iter {it + 1:>6d} | "
+                        f"archive = {len(archive):>4d} solutions"
+                    )
+
+                if callback is not None:
+                    partial = ParetoResult(
+                        front=archive.front(),
+                        archive_history=archive_history,
+                        iterations=it + 1,
+                        elapsed_seconds=time.perf_counter() - t0,
+                    )
+                    callback(it + 1, partial)
+
+                if checkpoint_path and (it + 1) % checkpoint_every == 0:
+                    payload = {
+                        "iteration": it + 1,
+                        "memory":    self._memory.to_dict(),
+                        "archive":   archive.to_dict(),
+                    }
+                    Path(checkpoint_path).write_text(json.dumps(payload, indent=2))
+
+        except StopIteration:
+            pass
+
+        return ParetoResult(
+            front=archive.front(),
+            archive_history=archive_history,
+            iterations=len(archive_history),
+            elapsed_seconds=time.perf_counter() - t0,
+        )
