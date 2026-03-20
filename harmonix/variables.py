@@ -126,14 +126,26 @@ class Continuous(Variable):
 
     def neighbor(self, value: float, ctx: Context) -> float:
         """
-        Perturb *value* by a Gaussian step (σ = 5 % of domain width),
-        clamped to [lo, hi].
+        Perturb *value* by a Gaussian step, clamped to [lo, hi].
+
+        Step size
+        ---------
+        σ = bw × (hi − lo)
+
+        where *bw* (bandwidth) is read from ``ctx["__bw__"]`` when present,
+        and defaults to 0.05 (5 % of domain width) otherwise.
+
+        The optimizer injects ``ctx["__bw__"]`` automatically when
+        ``bw_max`` / ``bw_min`` are supplied to :meth:`optimize`.  For
+        variables that do not use bandwidth (Discrete, Categorical, …) the
+        key is simply ignored.
         """
         lo, hi = self._bounds(ctx)
         width = hi - lo
         if width <= 0:
             return value
-        new_val = value + random.gauss(0.0, 0.05 * width)
+        bw = ctx.get("__bw__", 0.05)
+        new_val = value + random.gauss(0.0, bw * width)
         return max(lo, min(hi, new_val))
 
 

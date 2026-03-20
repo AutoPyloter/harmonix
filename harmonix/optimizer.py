@@ -193,7 +193,7 @@ class HarmonySearchOptimizer(ABC):
 
     # --- core HS operators -------------------------------------------------
 
-    def _improvise(self, hmcr: float, par: float) -> Harmony:
+    def _improvise(self, hmcr: float, par: float, bw: float = 0.05) -> Harmony:
         """
         Single improvisation step (all variables, in definition order).
 
@@ -202,8 +202,19 @@ class HarmonySearchOptimizer(ABC):
            collect values from memory → filter to context-feasible ones
            → pick one → with probability PAR apply pitch adjustment.
         2. With probability (1 − HMCR) — random selection.
+
+        Parameters
+        ----------
+        hmcr : float
+            Harmony Memory Considering Rate.
+        par : float
+            Pitch Adjusting Rate.
+        bw : float
+            Current bandwidth for continuous pitch adjustment.
+            Injected into ``ctx["__bw__"]`` so :class:`~variables.Continuous`
+            can read it without changing the ``Variable`` interface.
         """
-        ctx: Harmony = {}
+        ctx: Harmony = {"__bw__": bw}
         for name, var in self.space.items():
             if random.random() < hmcr:
                 candidates = [h[name] for h in self._memory.harmonies]
@@ -218,10 +229,12 @@ class HarmonySearchOptimizer(ABC):
                     continue
             # Random selection (fallback when HMCR misses or no valid candidates)
             ctx[name] = var.sample(ctx=ctx)
+        # Remove internal key before returning
+        ctx.pop("__bw__", None)
         return ctx
 
     def _improvise_from_archive(
-        self, hmcr: float, par: float, archive: ParetoArchive
+        self, hmcr: float, par: float, archive: ParetoArchive, bw: float = 0.05
     ) -> Harmony:
         """
         Improvisation that draws base values from the Pareto archive.
@@ -230,7 +243,7 @@ class HarmonySearchOptimizer(ABC):
         exactly as in :meth:`_improvise`.  If no archive value survives the
         filter, falls back to a fresh sample.
         """
-        ctx: Harmony = {}
+        ctx: Harmony = {"__bw__": bw}
         for name, var in self.space.items():
             if random.random() < hmcr and archive.entries:
                 archive_values = [e.harmony[name] for e in archive.entries]
@@ -244,7 +257,50 @@ class HarmonySearchOptimizer(ABC):
                     )
                     continue
             ctx[name] = var.sample(ctx=ctx)
+        ctx.pop("__bw__", None)
         return ctx
+
+
+    def _compute_bw(
+        self,
+        iteration: int,
+        max_iter:  int,
+        bw_max:    float,
+        bw_min:    float,
+    ) -> float:
+        """
+        Compute the current pitch-adjustment bandwidth using exponential decay.
+
+        .. math::
+
+            bw(t) = bw_max * exp(-ln(bw_max/bw_min) * t / T)
+
+        where *t* is the current iteration and *T* is ``max_iter``.
+
+        When ``bw_max == bw_min`` (or ``max_iter == 0``) the bandwidth is
+        constant and equals ``bw_max``.
+
+        Parameters
+        ----------
+        iteration : int
+            Current iteration index (0-based).
+        max_iter : int
+            Total number of improvisation steps.
+        bw_max : float
+            Initial bandwidth (fraction of domain width).
+        bw_min : float
+            Final bandwidth (fraction of domain width).
+        """
+        if bw_max <= 0 or bw_min <= 0:
+            raise ValueError("bw_max and bw_min must be positive.")
+        if bw_min > bw_max:
+            raise ValueError("bw_min must be <= bw_max.")
+        if max_iter <= 1 or bw_max == bw_min:
+            return bw_max
+        import math
+        return bw_max * math.exp(
+            -math.log(bw_max / bw_min) * iteration / max_iter
+        )
 
     # --- checkpoint --------------------------------------------------------
 
@@ -295,6 +351,8 @@ class Minimization(HarmonySearchOptimizer):
         memory_size:      int   = 20,
         hmcr:             float = 0.85,
         par:              float = 0.35,
+        bw_max:           float = 0.05,
+        bw_min:           float = 0.001,
         max_iter:         int   = 5000,
         callback:         Optional[Callable[[int, OptimizationResult], None]] = None,
         checkpoint_path:  Optional[Path] = None,
@@ -341,7 +399,8 @@ class Minimization(HarmonySearchOptimizer):
 
         try:
             for it in range(start_iter, max_iter):
-                new_h        = self._improvise(hmcr, par)
+                bw           = self._compute_bw(it - start_iter, max_iter - start_iter, bw_max, bw_min)
+                new_h        = self._improvise(hmcr, par, bw)
                 new_f, new_p = self.objective(new_h)
                 self._memory.try_replace_worst(new_h, float(new_f), float(new_p))
 
@@ -402,6 +461,8 @@ class Maximization(HarmonySearchOptimizer):
         memory_size:      int   = 20,
         hmcr:             float = 0.85,
         par:              float = 0.35,
+        bw_max:           float = 0.05,
+        bw_min:           float = 0.001,
         max_iter:         int   = 5000,
         callback:         Optional[Callable[[int, OptimizationResult], None]] = None,
         checkpoint_path:  Optional[Path] = None,
@@ -432,6 +493,7 @@ class Maximization(HarmonySearchOptimizer):
         result = inner.optimize(
             memory_size=memory_size, hmcr=hmcr, par=par,
             max_iter=max_iter,
+            bw_max=bw_max, bw_min=bw_min,
             callback=wrapped_callback,
             checkpoint_path=checkpoint_path,
             checkpoint_every=checkpoint_every,
@@ -494,6 +556,8 @@ class MultiObjective(HarmonySearchOptimizer):
         memory_size:      int   = 30,
         hmcr:             float = 0.85,
         par:              float = 0.35,
+        bw_max:           float = 0.05,
+        bw_min:           float = 0.001,
         max_iter:         int   = 5000,
         archive_size:     int   = 100,
         callback:         Optional[Callable[[int, ParetoResult], None]] = None,
@@ -547,9 +611,10 @@ class MultiObjective(HarmonySearchOptimizer):
         try:
             for it in range(start_iter, max_iter):
                 if archive.entries:
-                    new_h = self._improvise_from_archive(hmcr, par, archive)
+                    new_h = self._improvise_from_archive(hmcr, par, archive, bw)
                 else:
-                    new_h = self._improvise(hmcr, par)
+                    bw    = self._compute_bw(it - start_iter, max_iter - start_iter, bw_max, bw_min)
+                    new_h = self._improvise(hmcr, par, bw)
 
                 objs, p = self.objective(new_h)
                 objs    = tuple(float(v) for v in objs)
