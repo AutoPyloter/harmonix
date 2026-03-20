@@ -619,7 +619,7 @@ class TestEngineeringPhysics:
 
     def test_aci_rebar_all_valid_codes_satisfy_rho(self):
         """Every code returned by _valid_codes must satisfy rho_min <= rho <= rho_max."""
-        from harmonix.spaces.engineering import ACIRebar, _aci_limits, _AREAS_50, _COUNTS, _DIAMETERS_MM
+        from harmonix.spaces.engineering import ACIRebar, _aci_limits, _AREAS_50, _COUNTS, _DIAMETERS
         var = ACIRebar(d_expr=0.45, cc_expr=0.06, fc=30.0, fy=420.0)
         ctx = {"d": 0.45, "cc": 0.06}
         codes = var._valid_codes(ctx)
