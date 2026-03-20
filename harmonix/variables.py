@@ -108,6 +108,12 @@ class Continuous(Variable):
     """
 
     def __init__(self, lo, hi):
+        # Validate static bounds early (callable bounds checked at sample time)
+        if not callable(lo) and not callable(hi):
+            if float(lo) > float(hi):
+                raise ValueError(
+                    f"Continuous: lo ({lo}) must be <= hi ({hi})."
+                )
         self._lo = lo
         self._hi = hi
 
@@ -171,6 +177,11 @@ class Discrete(Variable):
     """
 
     def __init__(self, lo, step, hi):
+        if not callable(lo) and not callable(hi) and not callable(step):
+            if float(step) <= 0:
+                raise ValueError(f"Discrete: step ({step}) must be positive.")
+            if float(lo) > float(hi):
+                raise ValueError(f"Discrete: lo ({lo}) must be <= hi ({hi}).")
         self._lo   = lo
         self._step = step
         self._hi   = hi
