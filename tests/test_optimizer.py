@@ -183,8 +183,11 @@ class TestMinimization:
 
     def test_checkpoint_resume(self):
         space = self._sphere_space()
-        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
-            ckpt = Path(f.name)
+        import tempfile, os
+        fd, fname = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        os.unlink(fname)          # remove so optimizer creates it fresh
+        ckpt = Path(fname)
 
         try:
             # Run 50 iterations, save checkpoint
@@ -346,8 +349,11 @@ class TestMultiObjective:
 
     def test_checkpoint_resume(self):
         space = self._zdt1_space()
-        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
-            ckpt = Path(f.name)
+        import tempfile, os
+        fd, fname = tempfile.mkstemp(suffix=".json")
+        os.close(fd)
+        os.unlink(fname)
+        ckpt = Path(fname)
 
         try:
             opt1 = MultiObjective(space, self._zdt1_obj)
