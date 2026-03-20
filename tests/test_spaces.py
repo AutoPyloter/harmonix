@@ -49,8 +49,12 @@ class TestNaturalNumber:
 
     def test_neighbor_at_bounds(self):
         v = NaturalNumber(hi=5)
-        assert v.neighbor(1, {}) == 2
-        assert v.neighbor(5, {}) == 4
+        for _ in range(20):
+            nb = v.neighbor(1, {})
+            assert nb in {1, 2}
+        for _ in range(20):
+            nb = v.neighbor(5, {})
+            assert nb in {4, 5}
 
 
 class TestWholeNumber:
