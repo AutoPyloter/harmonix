@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "harmonix"
@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [project.urls]
-"Source" = "https://github.com/abdulkadiroz/harmonix"
+"Source" = "https://github.com/AutoPyloter/harmonix"
 
 [tool.setuptools.packages.find]
 where = ["."]
