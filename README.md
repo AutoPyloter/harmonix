@@ -1,5 +1,9 @@
 # harmonix
 
+[![CI](https://github.com/AutoPyloter/harmonix/actions/workflows/ci.yml/badge.svg)](https://github.com/AutoPyloter/harmonix/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **Harmony Search optimisation with dependent variable spaces and engineering domain catalogues.**
 
 harmonix is a Python library for solving single- and multi-objective optimisation problems using the [Harmony Search](https://en.wikipedia.org/wiki/Harmony_search) metaheuristic. Its key design principle is *search-space first*: instead of just minimising a function, you describe the domain of each variable precisely — including dependencies between variables, discrete grids, catalogue lookups, and domain-specific feasibility rules — and let the algorithm handle the rest.
