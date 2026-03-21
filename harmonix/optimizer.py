@@ -420,7 +420,7 @@ class HarmonySearchOptimizer(ABC):
         return int(payload["iteration"])
 
     @abstractmethod
-    def optimize(self, **kwargs): ...
+    def optimize(self, **kwargs: Any) -> Any: ...
 
 
 # ---------------------------------------------------------------------------

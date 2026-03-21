@@ -124,9 +124,10 @@ class EvaluationCache:
         if key in self._cache:
             self._cache.move_to_end(key)  # mark as recently used
             self.hits += 1
-            return self._cache[key]
+            cached: Tuple[Fitness, Penalty] = self._cache[key]
+            return cached
 
-        result = self._objective(harmony)
+        result: Tuple[Fitness, Penalty] = self._objective(harmony)
         self._cache[key] = result
         if len(self._cache) > self._maxsize:
             self._cache.popitem(last=False)  # evict oldest

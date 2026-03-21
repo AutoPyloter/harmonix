@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import random
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 Context = Dict[str, Any]
 
@@ -194,7 +194,7 @@ class Discrete(Variable):
         hi = self._hi(ctx) if callable(self._hi) else self._hi
         return _frange(float(lo), float(step), float(hi))
 
-    def sample(self, ctx: Context) -> float:
+    def sample(self, ctx: Context) -> Optional[float]:
         grid = self._grid(ctx)
         return random.choice(grid) if grid else None
 
