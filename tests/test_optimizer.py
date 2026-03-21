@@ -167,7 +167,8 @@ class TestMinimization:
         fitness_values = []
         def cb(it, res):
             fitness_values.append(res.best_fitness)
-            if it >= 3: raise StopIteration
+            if it >= 3:
+                raise StopIteration
 
         Minimization(space, lambda h: (h["x"] ** 2, 0.0)).optimize(
             memory_size=5, max_iter=1000, callback=cb
@@ -183,7 +184,8 @@ class TestMinimization:
 
     def test_checkpoint_resume(self):
         space = self._sphere_space()
-        import tempfile, os
+        import tempfile
+        import os
         fd, fname = tempfile.mkstemp(suffix=".json")
         os.close(fd)
         os.unlink(fname)          # remove so optimizer creates it fresh
@@ -270,7 +272,8 @@ class TestMaximization:
         cb_values = []
         def cb(it, res):
             cb_values.append(res.best_fitness)
-            if it >= 5: raise StopIteration
+            if it >= 5:
+                raise StopIteration
 
         Maximization(space, lambda h: (h["x"], 0.0)).optimize(
             memory_size=5, max_iter=1000, callback=cb
@@ -340,7 +343,8 @@ class TestMultiObjective:
         calls = []
         def cb(it, res):
             calls.append(it)
-            if it >= 3: raise StopIteration
+            if it >= 3:
+                raise StopIteration
 
         MultiObjective(space, self._zdt1_obj).optimize(
             memory_size=5, max_iter=1000, callback=cb
@@ -349,7 +353,8 @@ class TestMultiObjective:
 
     def test_checkpoint_resume(self):
         space = self._zdt1_space()
-        import tempfile, os
+        import tempfile
+        import os
         fd, fname = tempfile.mkstemp(suffix=".json")
         os.close(fd)
         os.unlink(fname)

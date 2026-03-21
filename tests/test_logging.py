@@ -152,7 +152,7 @@ class TestEvaluationCache:
 class TestRunLogger:
     def test_init_log_headers(self, tmp_path):
         init_csv = tmp_path / "init.csv"
-        logger = RunLogger(
+        RunLogger(
             variable_names=["x", "y"],
             init_log_path=init_csv,
         )

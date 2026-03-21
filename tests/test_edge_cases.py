@@ -438,8 +438,8 @@ class TestSerializationIntegrity:
         ckpt = _tmp()
         try:
             opt1 = Minimization(space, lambda h: (h["x"]**2, 0.0))
-            r1 = opt1.optimize(memory_size=5, max_iter=30,
-                               checkpoint_path=ckpt, checkpoint_every=30)
+            opt1.optimize(memory_size=5, max_iter=30,
+                          checkpoint_path=ckpt, checkpoint_every=30)
             opt2 = Minimization(space, lambda h: (h["x"]**2, 0.0))
             opt2.optimize(memory_size=5, max_iter=60,
                           checkpoint_path=ckpt, checkpoint_every=60,
@@ -472,8 +472,6 @@ class TestSerializationIntegrity:
             opt1 = MultiObjective(space, zdt_simple)
             r1 = opt1.optimize(memory_size=10, max_iter=100, archive_size=20,
                                checkpoint_path=ckpt, checkpoint_every=100)
-            front1_size = len(r1.front)
-
             opt2 = MultiObjective(space, zdt_simple)
             r2 = opt2.optimize(memory_size=10, max_iter=200, archive_size=20,
                                checkpoint_path=ckpt, checkpoint_every=200,
