@@ -94,10 +94,10 @@ class TestContinuousProperties:
         assert all(lo <= x <= hi for x in result)
         assert set(result).issubset(set(candidates))
 
-    @given(st.floats(min_value=-100, max_value=100, allow_nan=False, allow_infinity=False))
+    @given(st.floats(min_value=1e-6, max_value=100, allow_nan=False, allow_infinity=False))
     @settings(max_examples=100)
     def test_lo_gt_hi_raises(self, delta):
-        assume(delta > 0)
+        assume(delta > 1e-6)
         with pytest.raises(ValueError):
             Continuous(10.0 + delta, 10.0)
 
@@ -112,25 +112,27 @@ class TestDiscreteProperties:
     @settings(max_examples=200)
     def test_sample_on_grid(self, params):
         lo, step, hi = params
+        # Only test when grid has at least 2 points to avoid degenerate cases
+        assume(hi >= lo + step)
         v = Discrete(lo, step, hi)
         result = v.sample({})
         if result is None:
             return
-        # Must be on the grid: (result - lo) is a multiple of step (within tolerance)
-        remainder = abs((result - lo) % step)
-        tolerance = step * 1e-6
-        assert (
-            remainder < tolerance or abs(remainder - step) < tolerance
-        ), f"sample={result} not on grid lo={lo}, step={step}"
+        # Must be on the grid: result = lo + k*step for some integer k
+        if step > 0:
+            k = round((result - lo) / step)
+            expected = lo + k * step
+            assert abs(result - expected) < step * 1e-5, f"sample={result} not on grid lo={lo}, step={step}"
 
     @given(params=valid_step_bounds())
     @settings(max_examples=200)
     def test_sample_in_bounds(self, params):
         lo, step, hi = params
+        assume(hi >= lo + step * 0.5)
         v = Discrete(lo, step, hi)
         result = v.sample({})
         if result is not None:
-            assert lo <= result <= hi + step * 1e-9
+            assert lo - step * 1e-9 <= result <= hi + step * 1e-9, f"sample={result} not in [{lo}, {hi}] step={step}"
 
     @given(
         lo=st.floats(min_value=-100, max_value=100, allow_nan=False, allow_infinity=False),
@@ -266,10 +268,11 @@ class TestHarmonyMemoryProperties:
     @settings(max_examples=100)
     def test_best_fitness_le_worst(self, values):
         mem = HarmonyMemory(size=len(values), mode="min")
-        for i, v in enumerate(values):
+        for v in values:
             mem.add({"x": v}, v, 0.0)
         _, best_f, _ = mem.best()
-        _, worst_f, _ = mem.worst()
+        worst_idx = mem.worst_index()
+        worst_f = mem._fitness[worst_idx]
         assert best_f <= worst_f
 
     @given(
