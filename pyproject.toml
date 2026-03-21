@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Harmony Search optimisation with dependent variable spaces and engineering domain catalogues"
 readme = "README.md"
 license = { text = "MIT" }
-authors = [{ name = "Abdulkadir Özcan", email = "abdulkadirozcan@outlook.com" }]
+authors = [{ name = "Abdulkadir Özcan", email = "a.kdr.ozcn@gmail.com" }]
 requires-python = ">=3.8"
 keywords = [
     "harmony search",
