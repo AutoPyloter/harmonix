@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.optimizer import HarmonySearchOptimizer, Minimization
+from harmonix.optimizer import Minimization
 from harmonix.space import DesignSpace
 from harmonix.variables import Categorical, Continuous, Discrete, Integer
 

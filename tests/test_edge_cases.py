@@ -18,8 +18,6 @@ Categories
 10. Engineering physics spot-checks
 """
 
-import csv
-import json
 import math
 import os
 import random
@@ -33,7 +31,7 @@ import pytest
 
 from harmonix.logging import EvaluationCache
 from harmonix.optimizer import HarmonyMemory, Maximization, Minimization, MultiObjective
-from harmonix.pareto import ParetoArchive, dominates
+from harmonix.pareto import ParetoArchive
 from harmonix.space import DesignSpace
 from harmonix.variables import Categorical, Continuous, Discrete, Integer
 

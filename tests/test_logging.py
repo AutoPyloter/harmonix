@@ -14,9 +14,7 @@ Covers:
 
 import csv
 import json
-import math
 import os
-import random
 import sys
 import tempfile
 from pathlib import Path
@@ -26,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pytest
 
 from harmonix.logging import EvaluationCache, RunLogger
-from harmonix.optimizer import Minimization, MultiObjective
+from harmonix.optimizer import Minimization
 from harmonix.space import DesignSpace
 from harmonix.variables import Continuous
 

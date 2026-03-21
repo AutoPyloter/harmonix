@@ -51,7 +51,7 @@ Or via the registry:
 from __future__ import annotations
 
 import random
-from typing import Any, List
+from typing import List
 
 from ..registry import register_variable
 from ..variables import Variable

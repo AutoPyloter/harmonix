@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pytest
 
 from harmonix.space import DesignSpace
-from harmonix.variables import Categorical, Continuous, Discrete, Integer
+from harmonix.variables import Categorical, Continuous, Integer
 
 
 class TestDesignSpaceConstruction:

@@ -10,10 +10,9 @@ variable *k* only sees values of variables defined *before* it.
 
 from __future__ import annotations
 
-import random
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from .variables import Context, Variable
+from .variables import Variable
 
 
 class DesignSpace:

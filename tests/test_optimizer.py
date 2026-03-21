@@ -9,12 +9,10 @@ import json
 import math
 import random
 import sys
-import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import pytest
 
 from harmonix.optimizer import (
     HarmonyMemory,
@@ -25,7 +23,7 @@ from harmonix.optimizer import (
 )
 from harmonix.pareto import ParetoResult
 from harmonix.space import DesignSpace
-from harmonix.variables import Continuous, Discrete, Integer
+from harmonix.variables import Continuous, Discrete
 
 # ---------------------------------------------------------------------------
 # HarmonyMemory

@@ -51,7 +51,7 @@ Design notes
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Callable, Dict, List, Optional, Type
 
 from .variables import Categorical, Continuous, Discrete, Integer, Variable
 
