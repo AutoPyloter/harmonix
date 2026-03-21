@@ -11,22 +11,23 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
-from harmonix.variables import Variable
-from harmonix.registry import (
-    register_variable,
-    get_variable_class,
-    create_variable,
-    list_variable_types,
-    unregister_variable,
-    VariableNotFoundError,
-    VariableAlreadyRegisteredError,
-    make_variable,
-)
 
+from harmonix.registry import (
+    VariableAlreadyRegisteredError,
+    VariableNotFoundError,
+    create_variable,
+    get_variable_class,
+    list_variable_types,
+    make_variable,
+    register_variable,
+    unregister_variable,
+)
+from harmonix.variables import Variable
 
 # ---------------------------------------------------------------------------
 # Built-in registrations
 # ---------------------------------------------------------------------------
+
 
 class TestBuiltinRegistrations:
     def test_builtins_are_registered(self):
@@ -37,15 +38,16 @@ class TestBuiltinRegistrations:
     def test_engineering_spaces_registered(self):
         # Importing harmonix triggers space registration
         import harmonix  # noqa: F401
+
         types = list_variable_types()
-        for name in ("aci_rebar", "steel_section", "concrete_grade",
-                     "soil_spt", "seismic_tbdy", "prime", "natural"):
+        for name in ("aci_rebar", "steel_section", "concrete_grade", "soil_spt", "seismic_tbdy", "prime", "natural"):
             assert name in types
 
 
 # ---------------------------------------------------------------------------
 # register_variable
 # ---------------------------------------------------------------------------
+
 
 class TestRegisterVariable:
     def setup_method(self):
@@ -59,18 +61,28 @@ class TestRegisterVariable:
     def test_decorator_form(self):
         @register_variable("_test_var")
         class _TestVar(Variable):
-            def sample(self, ctx): return 1
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 1
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         assert get_variable_class("_test_var") is _TestVar
         unregister_variable("_test_var")
 
     def test_function_call_form(self):
         class _TestVar2(Variable):
-            def sample(self, ctx): return 2
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 2
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         register_variable("_test_var2", _TestVar2)
         assert get_variable_class("_test_var2") is _TestVar2
@@ -79,9 +91,14 @@ class TestRegisterVariable:
     def test_case_insensitive(self):
         @register_variable("_test_var")
         class _TestVar(Variable):
-            def sample(self, ctx): return 1
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 1
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         assert get_variable_class("_TEST_VAR") is _TestVar
         assert get_variable_class("_Test_Var") is _TestVar
@@ -90,31 +107,52 @@ class TestRegisterVariable:
     def test_duplicate_raises(self):
         @register_variable("_test_var")
         class _TV1(Variable):
-            def sample(self, ctx): return 1
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 1
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         with pytest.raises(VariableAlreadyRegisteredError):
+
             @register_variable("_test_var")
             class _TV2(Variable):
-                def sample(self, ctx): return 2
-                def filter(self, c, ctx): return c
-                def neighbor(self, v, ctx): return v
+                def sample(self, ctx):
+                    return 2
+
+                def filter(self, c, ctx):
+                    return c
+
+                def neighbor(self, v, ctx):
+                    return v
 
         unregister_variable("_test_var")
 
     def test_overwrite_allowed(self):
         @register_variable("_test_var")
         class _TV1(Variable):
-            def sample(self, ctx): return 1
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 1
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         @register_variable("_test_var", overwrite=True)
         class _TV2(Variable):
-            def sample(self, ctx): return 2
-            def filter(self, c, ctx): return c
-            def neighbor(self, v, ctx): return v
+            def sample(self, ctx):
+                return 2
+
+            def filter(self, c, ctx):
+                return c
+
+            def neighbor(self, v, ctx):
+                return v
 
         assert get_variable_class("_test_var") is _TV2
         unregister_variable("_test_var")
@@ -127,6 +165,7 @@ class TestRegisterVariable:
 # ---------------------------------------------------------------------------
 # get_variable_class / create_variable
 # ---------------------------------------------------------------------------
+
 
 class TestLookup:
     def test_not_found_raises(self):
@@ -144,21 +183,22 @@ class TestLookup:
 # make_variable
 # ---------------------------------------------------------------------------
 
+
 class TestMakeVariable:
     def test_returns_variable_subclass(self):
         MyVar = make_variable(
-            sample   = lambda ctx: 42,
-            filter   = lambda cands, ctx: [c for c in cands if c == 42],
-            neighbor = lambda val, ctx: val,
+            sample=lambda ctx: 42,
+            filter=lambda cands, ctx: [c for c in cands if c == 42],
+            neighbor=lambda val, ctx: val,
         )
         assert issubclass(MyVar, Variable)
 
     def test_instance_methods_work(self):
         VALS = [2, 4, 6, 8]
         EvenVar = make_variable(
-            sample   = lambda ctx: random.choice(VALS),
-            filter   = lambda cands, ctx: [c for c in cands if c in VALS],
-            neighbor = lambda val, ctx: val,
+            sample=lambda ctx: random.choice(VALS),
+            filter=lambda cands, ctx: [c for c in cands if c in VALS],
+            neighbor=lambda val, ctx: val,
         )
         v = EvenVar()
         assert v.sample({}) in VALS
@@ -166,10 +206,10 @@ class TestMakeVariable:
 
     def test_name_applied(self):
         MyVar = make_variable(
-            sample   = lambda ctx: 1,
-            filter   = lambda c, ctx: c,
-            neighbor = lambda v, ctx: v,
-            name     = "SpecialVar",
+            sample=lambda ctx: 1,
+            filter=lambda c, ctx: c,
+            neighbor=lambda v, ctx: v,
+            name="SpecialVar",
         )
         assert MyVar.__name__ == "SpecialVar"
 
@@ -180,11 +220,11 @@ class TestMakeVariable:
             pass
 
         MyVar = make_variable(
-            sample   = lambda ctx: 99,
-            filter   = lambda c, ctx: c,
-            neighbor = lambda v, ctx: v,
-            name     = "_make_var_test",
-            register = True,
+            sample=lambda ctx: 99,
+            filter=lambda c, ctx: c,
+            neighbor=lambda v, ctx: v,
+            name="_make_var_test",
+            register=True,
         )
         assert get_variable_class("_make_var_test") is MyVar
         unregister_variable("_make_var_test")

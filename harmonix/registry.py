@@ -53,12 +53,12 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from .variables import Variable, Continuous, Discrete, Integer, Categorical
-
+from .variables import Categorical, Continuous, Discrete, Integer, Variable
 
 # ---------------------------------------------------------------------------
 # Exceptions
 # ---------------------------------------------------------------------------
+
 
 class VariableNotFoundError(KeyError):
     """Raised when a variable type name is not in the registry."""
@@ -82,6 +82,7 @@ def _normalise(name: str) -> str:
 # ---------------------------------------------------------------------------
 # register_variable
 # ---------------------------------------------------------------------------
+
 
 def register_variable(
     name: str,
@@ -107,13 +108,9 @@ def register_variable(
 
     def _register(klass: Type[Variable]) -> Type[Variable]:
         if not (isinstance(klass, type) and issubclass(klass, Variable)):
-            raise TypeError(
-                f"Only Variable subclasses can be registered; got {klass!r}."
-            )
+            raise TypeError(f"Only Variable subclasses can be registered; got {klass!r}.")
         if key in _REGISTRY and not overwrite:
-            raise VariableAlreadyRegisteredError(
-                f"'{name}' is already registered. Pass overwrite=True to replace."
-            )
+            raise VariableAlreadyRegisteredError(f"'{name}' is already registered. Pass overwrite=True to replace.")
         _REGISTRY[key] = klass
         return klass
 
@@ -123,6 +120,7 @@ def register_variable(
 # ---------------------------------------------------------------------------
 # make_variable
 # ---------------------------------------------------------------------------
+
 
 def make_variable(
     sample: Callable,
@@ -175,8 +173,8 @@ def make_variable(
     """
     class_name = name or "CustomVariable"
 
-    _sample_fn   = sample
-    _filter_fn   = filter
+    _sample_fn = sample
+    _filter_fn = filter
     _neighbor_fn = neighbor
 
     class _CustomVariable(Variable):
@@ -189,7 +187,7 @@ def make_variable(
         def neighbor(self, value, ctx):
             return _neighbor_fn(value, ctx)
 
-    _CustomVariable.__name__     = class_name
+    _CustomVariable.__name__ = class_name
     _CustomVariable.__qualname__ = class_name
 
     if register and name:
@@ -202,6 +200,7 @@ def make_variable(
 # Lookup helpers
 # ---------------------------------------------------------------------------
 
+
 def get_variable_class(name: str) -> Type[Variable]:
     """
     Return the class registered under *name*.
@@ -213,8 +212,7 @@ def get_variable_class(name: str) -> Type[Variable]:
         return _REGISTRY[key]
     except KeyError:
         raise VariableNotFoundError(
-            f"No variable type '{name}' in registry. "
-            f"Available: {list_variable_types()}"
+            f"No variable type '{name}' in registry. Available: {list_variable_types()}"
         ) from None
 
 
@@ -248,7 +246,7 @@ def unregister_variable(name: str) -> None:
 # Pre-register built-in primitive types
 # ---------------------------------------------------------------------------
 
-register_variable("continuous",  Continuous,  overwrite=True)
-register_variable("discrete",    Discrete,    overwrite=True)
-register_variable("integer",     Integer,     overwrite=True)
+register_variable("continuous", Continuous, overwrite=True)
+register_variable("discrete", Discrete, overwrite=True)
+register_variable("integer", Integer, overwrite=True)
 register_variable("categorical", Categorical, overwrite=True)

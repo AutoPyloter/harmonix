@@ -30,13 +30,14 @@ import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-Harmony   = Dict[str, Any]
-ObjVector = Tuple[float, ...]   # one float per objective
+Harmony = Dict[str, Any]
+ObjVector = Tuple[float, ...]  # one float per objective
 
 
 # ---------------------------------------------------------------------------
 # Dominance utilities
 # ---------------------------------------------------------------------------
+
 
 def dominates(a: ObjVector, b: ObjVector) -> bool:
     """
@@ -101,13 +102,13 @@ def crowding_distances(
 
     for m in range(n_obj):
         # Sort by objective m
-        order  = sorted(range(n), key=lambda i: objective_vectors[i][m])
-        f_min  = objective_vectors[order[0]][m]
-        f_max  = objective_vectors[order[-1]][m]
-        span   = f_max - f_min
+        order = sorted(range(n), key=lambda i: objective_vectors[i][m])
+        f_min = objective_vectors[order[0]][m]
+        f_max = objective_vectors[order[-1]][m]
+        span = f_max - f_min
 
         # Boundary points get infinite distance
-        distances[order[0]]  = math.inf
+        distances[order[0]] = math.inf
         distances[order[-1]] = math.inf
 
         if span == 0:
@@ -125,15 +126,17 @@ def crowding_distances(
 # Archive entry
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ArchiveEntry:
-    harmony:   Harmony
+    harmony: Harmony
     objectives: ObjVector
 
 
 # ---------------------------------------------------------------------------
 # Pareto archive
 # ---------------------------------------------------------------------------
+
 
 class ParetoArchive:
     """
@@ -186,10 +189,7 @@ class ParetoArchive:
                 return  # candidate is dominated — do not insert
 
         # 2. Remove solutions the candidate dominates
-        self._entries = [
-            e for e in self._entries
-            if not dominates(objectives, e.objectives)
-        ]
+        self._entries = [e for e in self._entries if not dominates(objectives, e.objectives)]
 
         # 3. Insert
         self._entries.append(ArchiveEntry(harmony=harmony, objectives=objectives))
@@ -202,9 +202,7 @@ class ParetoArchive:
         vecs = [e.objectives for e in self._entries]
         dists = crowding_distances(vecs)
         # Remove the entry with the smallest finite crowding distance
-        finite_indices = [
-            i for i, d in enumerate(dists) if d != math.inf
-        ]
+        finite_indices = [i for i, d in enumerate(dists) if d != math.inf]
         if finite_indices:
             victim = min(finite_indices, key=lambda i: dists[i])
         else:
@@ -228,7 +226,7 @@ class ParetoArchive:
             return None
         k = min(k, len(self._entries))
         contestants = random.sample(self._entries, k)
-        vecs  = [e.objectives for e in self._entries]
+        vecs = [e.objectives for e in self._entries]
         dists = crowding_distances(vecs)
         idx_map = {id(e): i for i, e in enumerate(self._entries)}
         return max(contestants, key=lambda e: dists[idx_map[id(e)]])
@@ -242,10 +240,7 @@ class ParetoArchive:
     def to_dict(self) -> dict:
         return {
             "max_size": self.max_size,
-            "entries":  [
-                {"harmony": e.harmony, "objectives": list(e.objectives)}
-                for e in self._entries
-            ],
+            "entries": [{"harmony": e.harmony, "objectives": list(e.objectives)} for e in self._entries],
         }
 
     @classmethod
@@ -265,6 +260,7 @@ class ParetoArchive:
 # Result container for multi-objective runs
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ParetoResult:
     """
@@ -279,9 +275,10 @@ class ParetoResult:
     iterations : int
     elapsed_seconds : float
     """
-    front:           List[ArchiveEntry]
+
+    front: List[ArchiveEntry]
     archive_history: List[int]
-    iterations:      int
+    iterations: int
     elapsed_seconds: float
 
     def __repr__(self) -> str:

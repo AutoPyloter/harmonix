@@ -13,7 +13,7 @@ from __future__ import annotations
 import random
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from .variables import Variable, Context
+from .variables import Context, Variable
 
 
 class DesignSpace:
@@ -47,10 +47,7 @@ class DesignSpace:
     def add(self, name: str, variable: Variable) -> "DesignSpace":
         """Add a named variable.  Returns *self* for chaining."""
         if not isinstance(variable, Variable):
-            raise TypeError(
-                f"Expected a Variable instance for '{name}', "
-                f"got {type(variable).__name__}."
-            )
+            raise TypeError(f"Expected a Variable instance for '{name}', got {type(variable).__name__}.")
         self._vars[name] = variable
         return self
 

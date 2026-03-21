@@ -53,8 +53,8 @@ from __future__ import annotations
 import random
 from typing import Any, List
 
+from ..registry import register_variable
 from ..variables import Variable
-from ..registry  import register_variable
 
 Context = dict
 
@@ -62,6 +62,7 @@ Context = dict
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _sieve(limit: int) -> List[int]:
     """Return all primes up to *limit* via the Sieve of Eratosthenes."""
@@ -101,6 +102,7 @@ def _powers_of_two_in_range(lo: int, hi: int) -> List[int]:
 # NaturalNumber  {1, 2, …, hi}
 # ---------------------------------------------------------------------------
 
+
 @register_variable("natural")
 class NaturalNumber(Variable):
     """
@@ -130,8 +132,7 @@ class NaturalNumber(Variable):
         return random.randint(self._lo, self._hi)
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
-        return [v for v in candidates
-                if isinstance(v, int) and self._lo <= v <= self._hi]
+        return [v for v in candidates if isinstance(v, int) and self._lo <= v <= self._hi]
 
     def neighbor(self, value: int, ctx: Context) -> int:
         delta = random.choice([-1, 1])
@@ -141,6 +142,7 @@ class NaturalNumber(Variable):
 # ---------------------------------------------------------------------------
 # WholeNumber  {0, 1, 2, …, hi}
 # ---------------------------------------------------------------------------
+
 
 @register_variable("whole")
 class WholeNumber(Variable):
@@ -160,8 +162,7 @@ class WholeNumber(Variable):
         return random.randint(0, self._hi)
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
-        return [v for v in candidates
-                if isinstance(v, int) and 0 <= v <= self._hi]
+        return [v for v in candidates if isinstance(v, int) and 0 <= v <= self._hi]
 
     def neighbor(self, value: int, ctx: Context) -> int:
         delta = random.choice([-1, 1])
@@ -171,6 +172,7 @@ class WholeNumber(Variable):
 # ---------------------------------------------------------------------------
 # NegativeInt  {lo, …, −1}
 # ---------------------------------------------------------------------------
+
 
 @register_variable("negative_int")
 class NegativeInt(Variable):
@@ -192,8 +194,7 @@ class NegativeInt(Variable):
         return random.randint(self._lo, -1)
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
-        return [v for v in candidates
-                if isinstance(v, int) and self._lo <= v <= -1]
+        return [v for v in candidates if isinstance(v, int) and self._lo <= v <= -1]
 
     def neighbor(self, value: int, ctx: Context) -> int:
         delta = random.choice([-1, 1])
@@ -203,6 +204,7 @@ class NegativeInt(Variable):
 # ---------------------------------------------------------------------------
 # NegativeReal  (lo, 0)
 # ---------------------------------------------------------------------------
+
 
 @register_variable("negative_real")
 class NegativeReal(Variable):
@@ -236,6 +238,7 @@ class NegativeReal(Variable):
 # PositiveReal  (0, hi]
 # ---------------------------------------------------------------------------
 
+
 @register_variable("positive_real")
 class PositiveReal(Variable):
     """
@@ -266,6 +269,7 @@ class PositiveReal(Variable):
 # ---------------------------------------------------------------------------
 # PrimeVariable  — primes in [lo, hi]
 # ---------------------------------------------------------------------------
+
 
 @register_variable("prime")
 class PrimeVariable(Variable):
@@ -305,7 +309,7 @@ class PrimeVariable(Variable):
     def neighbor(self, value: int, ctx: Context) -> int:
         if value not in self._prime_set:
             return self.sample(ctx)
-        idx   = self._primes.index(value)
+        idx = self._primes.index(value)
         delta = random.choice([-1, 1])
         new_idx = max(0, min(len(self._primes) - 1, idx + delta))
         return self._primes[new_idx]
@@ -314,6 +318,7 @@ class PrimeVariable(Variable):
 # ---------------------------------------------------------------------------
 # PowerOfTwo  — {2⁰, 2¹, …} ∩ [lo, hi]
 # ---------------------------------------------------------------------------
+
 
 @register_variable("power_of_two")
 class PowerOfTwo(Variable):
@@ -352,7 +357,7 @@ class PowerOfTwo(Variable):
     def neighbor(self, value: int, ctx: Context) -> int:
         if value not in self._values:
             return self.sample(ctx)
-        idx   = self._values.index(value)
+        idx = self._values.index(value)
         delta = random.choice([-1, 1])
         new_idx = max(0, min(len(self._values) - 1, idx + delta))
         return self._values[new_idx]
@@ -361,6 +366,7 @@ class PowerOfTwo(Variable):
 # ---------------------------------------------------------------------------
 # Fibonacci  — Fibonacci numbers in [lo, hi]
 # ---------------------------------------------------------------------------
+
 
 @register_variable("fibonacci")
 class Fibonacci(Variable):
@@ -396,7 +402,7 @@ class Fibonacci(Variable):
     def neighbor(self, value: int, ctx: Context) -> int:
         if value not in self._values:
             return self.sample(ctx)
-        idx   = self._values.index(value)
+        idx = self._values.index(value)
         delta = random.choice([-1, 1])
         new_idx = max(0, min(len(self._values) - 1, idx + delta))
         return self._values[new_idx]

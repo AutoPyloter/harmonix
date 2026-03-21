@@ -46,6 +46,7 @@ Penalty = float
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _resolve_path(
     explicit: Optional[Path],
     checkpoint_path: Optional[Path],
@@ -75,6 +76,7 @@ def _harmony_key(harmony: Harmony) -> tuple:
 # ---------------------------------------------------------------------------
 # EvaluationCache
 # ---------------------------------------------------------------------------
+
 
 class EvaluationCache:
     """
@@ -112,15 +114,15 @@ class EvaluationCache:
 
     def __init__(self, objective: Callable, maxsize: int = 4096):
         self._objective = objective
-        self._maxsize   = maxsize
+        self._maxsize = maxsize
         self._cache: OrderedDict = OrderedDict()
-        self.hits   = 0
+        self.hits = 0
         self.misses = 0
 
     def __call__(self, harmony: Harmony) -> Tuple[Fitness, Penalty]:
         key = _harmony_key(harmony)
         if key in self._cache:
-            self._cache.move_to_end(key)   # mark as recently used
+            self._cache.move_to_end(key)  # mark as recently used
             self.hits += 1
             return self._cache[key]
 
@@ -141,7 +143,7 @@ class EvaluationCache:
 
     def stats(self) -> str:
         total = self.hits + self.misses
-        rate  = self.hits / total * 100 if total else 0
+        rate = self.hits / total * 100 if total else 0
         return (
             f"EvaluationCache: {self.hits} hits / {total} total "
             f"({rate:.1f}% hit rate)  size={self.size}/{self._maxsize}"
@@ -151,6 +153,7 @@ class EvaluationCache:
 # ---------------------------------------------------------------------------
 # RunLogger
 # ---------------------------------------------------------------------------
+
 
 class RunLogger:
     """
@@ -187,18 +190,18 @@ class RunLogger:
 
     def __init__(
         self,
-        variable_names:   List[str],
-        init_log_path:    Optional[Path] = None,
-        eval_log_path:    Optional[Path] = None,
+        variable_names: List[str],
+        init_log_path: Optional[Path] = None,
+        eval_log_path: Optional[Path] = None,
         history_log_path: Optional[Path] = None,
-        history_every:    int = 1,
+        history_every: int = 1,
     ):
-        self._names        = variable_names
-        self._init_path    = init_log_path
-        self._eval_path    = eval_log_path
-        self._hist_path    = history_log_path
-        self._hist_every   = max(1, history_every)
-        self._t0           = time.perf_counter()
+        self._names = variable_names
+        self._init_path = init_log_path
+        self._eval_path = eval_log_path
+        self._hist_path = history_log_path
+        self._hist_every = max(1, history_every)
+        self._t0 = time.perf_counter()
 
         # Write CSV headers
         if self._init_path:
@@ -216,8 +219,7 @@ class RunLogger:
         if self._hist_path:
             self._write_csv(
                 self._hist_path,
-                ["iteration", "best_fitness", "best_penalty", "feasible"]
-                + ["best_" + n for n in self._names],
+                ["iteration", "best_fitness", "best_penalty", "feasible"] + ["best_" + n for n in self._names],
                 mode="w",
             )
 
@@ -240,19 +242,15 @@ class RunLogger:
         if not self._init_path:
             return
         for idx, (h, f, p) in enumerate(zip(harmonies, fitnesses, penalties)):
-            row = (
-                [idx]
-                + [h.get(n) for n in self._names]
-                + [f, p, int(p <= 0)]
-            )
+            row = [idx] + [h.get(n) for n in self._names] + [f, p, int(p <= 0)]
             self._write_csv(self._init_path, row)
 
     def log_evaluation(
         self,
         iteration: int,
-        harmony:   Harmony,
-        fitness:   Fitness,
-        penalty:   Penalty,
+        harmony: Harmony,
+        fitness: Fitness,
+        penalty: Penalty,
     ) -> None:
         """Append one evaluated harmony to the evaluation log."""
         if not self._eval_path:
@@ -267,7 +265,7 @@ class RunLogger:
 
     def log_iteration(
         self,
-        iteration:    int,
+        iteration: int,
         best_harmony: Harmony,
         best_fitness: Fitness,
         best_penalty: Penalty,
@@ -277,8 +275,7 @@ class RunLogger:
             return
         if iteration % self._hist_every != 0:
             return
-        row = (
-            [iteration, best_fitness, best_penalty, int(best_penalty <= 0)]
-            + [best_harmony.get(n) for n in self._names]
-        )
+        row = [iteration, best_fitness, best_penalty, int(best_penalty <= 0)] + [
+            best_harmony.get(n) for n in self._names
+        ]
         self._write_csv(self._hist_path, row)

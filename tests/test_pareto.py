@@ -12,18 +12,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
+
 from harmonix.pareto import (
-    ParetoArchive,
     ArchiveEntry,
+    ParetoArchive,
+    crowding_distances,
     dominates,
     non_dominated_front,
-    crowding_distances,
 )
-
 
 # ---------------------------------------------------------------------------
 # dominates (already in test_spaces.py but extended here)
 # ---------------------------------------------------------------------------
+
 
 class TestDominates:
     def test_strictly_better_in_all(self):
@@ -50,6 +51,7 @@ class TestDominates:
 # ---------------------------------------------------------------------------
 # non_dominated_front
 # ---------------------------------------------------------------------------
+
 
 class TestNonDominatedFront:
     def test_single_solution(self):
@@ -78,6 +80,7 @@ class TestNonDominatedFront:
 # crowding_distances
 # ---------------------------------------------------------------------------
 
+
 class TestCrowdingDistances:
     def test_boundaries_get_inf(self):
         vecs = [(0.0, 0.0), (0.5, 0.5), (1.0, 1.0)]
@@ -105,6 +108,7 @@ class TestCrowdingDistances:
 # ---------------------------------------------------------------------------
 # ParetoArchive
 # ---------------------------------------------------------------------------
+
 
 class TestParetoArchive:
     def test_add_non_dominated(self):
@@ -178,7 +182,7 @@ class TestParetoArchive:
     def test_duplicate_not_double_added(self):
         arch = ParetoArchive(max_size=10)
         arch.add({"x": 1}, (0.5, 0.5))
-        arch.add({"x": 2}, (0.5, 0.5))   # same objectives, different harmony
+        arch.add({"x": 2}, (0.5, 0.5))  # same objectives, different harmony
         # Both are non-dominated (equal, not dominating each other)
         # so both should be present
         assert len(arch) == 2
@@ -187,6 +191,7 @@ class TestParetoArchive:
 # ---------------------------------------------------------------------------
 # ArchiveEntry
 # ---------------------------------------------------------------------------
+
 
 class TestArchiveEntry:
     def test_fields(self):

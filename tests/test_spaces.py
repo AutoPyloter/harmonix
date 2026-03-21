@@ -11,21 +11,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
-import harmonix  # triggers all space registrations
-from harmonix.spaces.math import (
-    NaturalNumber, WholeNumber, NegativeInt, NegativeReal,
-    PositiveReal, PrimeVariable, PowerOfTwo, Fibonacci,
-)
-from harmonix.spaces.engineering import (
-    ACIRebar, ACIDoubleRebar,
-    SteelSection, ConcreteGrade,
-    SoilSPT, SeismicZoneTBDY,
-)
 
+import harmonix  # triggers all space registrations
+from harmonix.spaces.engineering import (
+    ACIDoubleRebar,
+    ACIRebar,
+    ConcreteGrade,
+    SeismicZoneTBDY,
+    SoilSPT,
+    SteelSection,
+)
+from harmonix.spaces.math import (
+    Fibonacci,
+    NaturalNumber,
+    NegativeInt,
+    NegativeReal,
+    PositiveReal,
+    PowerOfTwo,
+    PrimeVariable,
+    WholeNumber,
+)
 
 # ---------------------------------------------------------------------------
 # Math spaces — shared behaviour
 # ---------------------------------------------------------------------------
+
 
 class TestNaturalNumber:
     def test_sample_in_range(self):
@@ -136,8 +146,7 @@ class TestPrimeVariable:
         primes = v._primes
         nb = v.neighbor(11, {})
         idx = primes.index(11)
-        assert nb in (primes[idx - 1] if idx > 0 else 11,
-                      primes[idx + 1] if idx < len(primes) - 1 else 11)
+        assert nb in (primes[idx - 1] if idx > 0 else 11, primes[idx + 1] if idx < len(primes) - 1 else 11)
 
     def test_no_primes_raises(self):
         with pytest.raises(ValueError):
@@ -178,6 +187,7 @@ class TestFibonacci:
 # Engineering spaces
 # ---------------------------------------------------------------------------
 
+
 class TestACIRebar:
     def setup_method(self):
         self.var = ACIRebar(d_expr=0.55, cc_expr=40.0, fc=30.0, fy=420.0)
@@ -208,9 +218,10 @@ class TestACIRebar:
 
     def test_dependent_d(self):
         var = ACIRebar(
-            d_expr  = lambda ctx: ctx["d"],
-            cc_expr = 40.0,
-            fc=30.0, fy=420.0,
+            d_expr=lambda ctx: ctx["d"],
+            cc_expr=40.0,
+            fc=30.0,
+            fy=420.0,
         )
         code = var.sample({"d": 0.55})
         assert code is not None
@@ -379,23 +390,27 @@ class TestSeismicZoneTBDY:
 # Pareto utilities
 # ---------------------------------------------------------------------------
 
+
 class TestParetoDominance:
     def test_dominates_basic(self):
         from harmonix.pareto import dominates
+
         assert dominates((1.0, 2.0), (2.0, 3.0))
         assert not dominates((2.0, 3.0), (1.0, 2.0))
 
     def test_dominates_equal_not_dominate(self):
         from harmonix.pareto import dominates
+
         assert not dominates((1.0, 2.0), (1.0, 2.0))
 
     def test_dominates_partial_better(self):
         from harmonix.pareto import dominates
+
         assert dominates((1.0, 2.0), (1.0, 3.0))
         assert not dominates((1.0, 3.0), (1.0, 2.0))
 
     def test_different_lengths_raises(self):
         from harmonix.pareto import dominates
+
         with pytest.raises(ValueError):
             dominates((1.0,), (1.0, 2.0))
-

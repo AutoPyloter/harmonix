@@ -33,28 +33,27 @@ Every type is also accessible via the plugin registry:
     var = create_variable("aci_rebar", d_expr=0.55, cc_expr=40.0)
 """
 
+from .engineering import (
+    ACIDoubleRebar,
+    ACIRebar,
+    ConcreteGrade,
+    ConcreteGradeProperties,
+    SectionProperties,
+    SeismicZone,
+    SeismicZoneTBDY,
+    SoilProfile,
+    SoilSPT,
+    SteelSection,
+)
 from .math import (
+    Fibonacci,
     NaturalNumber,
-    WholeNumber,
     NegativeInt,
     NegativeReal,
     PositiveReal,
-    PrimeVariable,
     PowerOfTwo,
-    Fibonacci,
-)
-
-from .engineering import (
-    ACIRebar,
-    ACIDoubleRebar,
-    SteelSection,
-    SectionProperties,
-    ConcreteGrade,
-    ConcreteGradeProperties,
-    SoilSPT,
-    SoilProfile,
-    SeismicZoneTBDY,
-    SeismicZone,
+    PrimeVariable,
+    WholeNumber,
 )
 
 __all__ = [

@@ -36,6 +36,7 @@ Context = Dict[str, Any]
 # Abstract base
 # ---------------------------------------------------------------------------
 
+
 class Variable(ABC):
     """Abstract base class for all design variables."""
 
@@ -55,6 +56,7 @@ class Variable(ABC):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _frange(lo: float, step: float, hi: float) -> List[float]:
     """
@@ -86,6 +88,7 @@ def _in_grid(value: float, grid: List[float], tol: float = 1e-9) -> bool:
 # Continuous variable  [lo, hi]
 # ---------------------------------------------------------------------------
 
+
 class Continuous(Variable):
     """
     Uniformly distributed real-valued variable.
@@ -111,9 +114,7 @@ class Continuous(Variable):
         # Validate static bounds early (callable bounds checked at sample time)
         if not callable(lo) and not callable(hi):
             if float(lo) > float(hi):
-                raise ValueError(
-                    f"Continuous: lo ({lo}) must be <= hi ({hi})."
-                )
+                raise ValueError(f"Continuous: lo ({lo}) must be <= hi ({hi}).")
         self._lo = lo
         self._hi = hi
 
@@ -159,6 +160,7 @@ class Continuous(Variable):
 # Discrete variable  {lo, lo+step, …, hi}
 # ---------------------------------------------------------------------------
 
+
 class Discrete(Variable):
     """
     Variable taking values on a regular grid ``{lo, lo+step, …, hi}``.
@@ -182,14 +184,14 @@ class Discrete(Variable):
                 raise ValueError(f"Discrete: step ({step}) must be positive.")
             if float(lo) > float(hi):
                 raise ValueError(f"Discrete: lo ({lo}) must be <= hi ({hi}).")
-        self._lo   = lo
+        self._lo = lo
         self._step = step
-        self._hi   = hi
+        self._hi = hi
 
     def _grid(self, ctx: Context) -> List[float]:
-        lo   = self._lo(ctx)   if callable(self._lo)   else self._lo
+        lo = self._lo(ctx) if callable(self._lo) else self._lo
         step = self._step(ctx) if callable(self._step) else self._step
-        hi   = self._hi(ctx)   if callable(self._hi)   else self._hi
+        hi = self._hi(ctx) if callable(self._hi) else self._hi
         return _frange(float(lo), float(step), float(hi))
 
     def sample(self, ctx: Context) -> float:
@@ -207,7 +209,7 @@ class Discrete(Variable):
         # Find nearest grid index with tolerance
         nearest = min(range(len(grid)), key=lambda i: abs(grid[i] - value))
         if abs(grid[nearest] - value) > 1e-9:
-            return value   # value not on grid; return unchanged
+            return value  # value not on grid; return unchanged
         candidates = []
         if nearest > 0:
             candidates.append(grid[nearest - 1])
@@ -219,6 +221,7 @@ class Discrete(Variable):
 # ---------------------------------------------------------------------------
 # Categorical variable  {a, b, c, …}
 # ---------------------------------------------------------------------------
+
 
 class Categorical(Variable):
     """
@@ -259,6 +262,7 @@ class Categorical(Variable):
 # Integer variable  {lo, lo+1, …, hi}
 # ---------------------------------------------------------------------------
 
+
 class Integer(Variable):
     """
     Integer-valued variable over the closed interval ``[lo, hi]``.
@@ -279,9 +283,7 @@ class Integer(Variable):
         return int(round(v)) if v is not None else None
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
-        return [int(round(v)) for v in self._inner.filter(
-            [float(c) for c in candidates], ctx
-        )]
+        return [int(round(v)) for v in self._inner.filter([float(c) for c in candidates], ctx)]
 
     def neighbor(self, value: int, ctx: Context) -> int:
         return int(round(self._inner.neighbor(float(value), ctx)))

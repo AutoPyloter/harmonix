@@ -37,65 +37,64 @@ and are also re-exported here for convenience:
 """
 
 # --- primitives ---
-from .variables import Variable, Continuous, Discrete, Integer, Categorical
+# --- logging / caching utilities ---
+from .logging import EvaluationCache, RunLogger
+
+# --- optimizers ---
+from .optimizer import (
+    HarmonyMemory,
+    HarmonySearchOptimizer,
+    Maximization,
+    Minimization,
+    MultiObjective,
+    OptimizationResult,
+)
+
+# --- pareto ---
+from .pareto import ArchiveEntry, ParetoArchive, ParetoResult, dominates
+
+# --- registry ---
+from .registry import (
+    VariableAlreadyRegisteredError,
+    VariableNotFoundError,
+    create_variable,
+    get_variable_class,
+    list_variable_types,
+    make_variable,
+    register_variable,
+    unregister_variable,
+)
 
 # --- space ---
 from .space import DesignSpace
 
-# --- optimizers ---
-from .optimizer import (
-    HarmonySearchOptimizer,
-    HarmonyMemory,
-    OptimizationResult,
-    Minimization,
-    Maximization,
-    MultiObjective,
-)
-
-# --- pareto ---
-from .pareto import ParetoArchive, ParetoResult, ArchiveEntry, dominates
-
-# --- registry ---
-from .registry import (
-    register_variable,
-    make_variable,
-    get_variable_class,
-    create_variable,
-    list_variable_types,
-    unregister_variable,
-    VariableNotFoundError,
-    VariableAlreadyRegisteredError,
-)
-
-# --- logging / caching utilities ---
-from .logging import EvaluationCache, RunLogger
-
 # --- built-in domain spaces (trigger registration via import) ---
 from .spaces import (
+    ACIDoubleRebar,
+    # engineering — rebar
+    ACIRebar,
+    ConcreteGrade,
+    ConcreteGradeProperties,
+    Fibonacci,
     # math
     NaturalNumber,
-    WholeNumber,
     NegativeInt,
     NegativeReal,
     PositiveReal,
-    PrimeVariable,
     PowerOfTwo,
-    Fibonacci,
-    # engineering — rebar
-    ACIRebar,
-    ACIDoubleRebar,
-    # engineering — sections & materials
-    SteelSection,
+    PrimeVariable,
     SectionProperties,
-    ConcreteGrade,
-    ConcreteGradeProperties,
-    # engineering — geotechnical
-    SoilSPT,
-    SoilProfile,
+    SeismicZone,
     # engineering — seismic
     SeismicZoneTBDY,
-    SeismicZone,
+    SoilProfile,
+    # engineering — geotechnical
+    SoilSPT,
+    # engineering — sections & materials
+    SteelSection,
+    WholeNumber,
 )
+from .variables import Categorical, Continuous, Discrete, Integer, Variable
 
 __all__ = [
     # primitives
@@ -156,5 +155,5 @@ __all__ = [
 ]
 
 __version__ = "1.0.0"
-__author__  = "Abdulkadir Özcan"
+__author__ = "Abdulkadir Özcan"
 __license__ = "MIT"

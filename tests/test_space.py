@@ -10,8 +10,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
-from harmonix.variables import Continuous, Discrete, Integer, Categorical
+
 from harmonix.space import DesignSpace
+from harmonix.variables import Categorical, Continuous, Discrete, Integer
 
 
 class TestDesignSpaceConstruction:
@@ -60,11 +61,7 @@ class TestDesignSpaceConstruction:
         assert "x" in repr(space)
 
     def test_chaining(self):
-        space = (
-            DesignSpace()
-            .add("x", Continuous(0.0, 1.0))
-            .add("y", Continuous(0.0, 1.0))
-        )
+        space = DesignSpace().add("x", Continuous(0.0, 1.0)).add("y", Continuous(0.0, 1.0))
         assert len(space) == 2
 
 
