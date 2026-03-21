@@ -21,6 +21,7 @@ Ricart, J., Hüttemann, G., Lima, J., & Barán, B. (2011).
 from __future__ import annotations
 
 import json
+import math
 import random
 import time
 from abc import ABC, abstractmethod
@@ -296,8 +297,6 @@ class HarmonySearchOptimizer(ABC):
             raise ValueError("bw_min must be <= bw_max.")
         if max_iter <= 1 or bw_max == bw_min:
             return bw_max
-        import math
-
         return bw_max * math.exp(-math.log(bw_max / bw_min) * iteration / max_iter)
 
     # --- run setup ---------------------------------------------------------
@@ -551,7 +550,7 @@ class Minimization(HarmonySearchOptimizer):
                 logger.log_iteration(it + 1, best_h, best_f, best_p)
 
                 if verbose:
-                    print(f"[HS] iter {it + 1:>6d} | fitness = {best_f:.6g} | penalty = {best_p:.4g}")
+                    print(f"[HS] iter {it + 1:>6d} | " f"fitness = {best_f:.6g} | penalty = {best_p:.4g}")
 
                 if callback is not None:
                     partial = OptimizationResult(
@@ -778,11 +777,15 @@ class MultiObjective(HarmonySearchOptimizer):
         ckpt = Path(checkpoint_path) if checkpoint_path else None
 
         # --- resolve log paths ---
-        from .logging import _resolve_path as _rp
-
-        init_path = _rp(Path(init_log_path) if init_log_path else None, ckpt, "_init") if log_init else None
-        eval_path = _rp(Path(eval_log_path) if eval_log_path else None, ckpt, "_evals") if log_evaluations else None
-        hist_path = _rp(Path(history_log_path) if history_log_path else None, ckpt, "_history") if log_history else None
+        init_path = _resolve_path(Path(init_log_path) if init_log_path else None, ckpt, "_init") if log_init else None
+        eval_path = (
+            _resolve_path(Path(eval_log_path) if eval_log_path else None, ckpt, "_evals") if log_evaluations else None
+        )
+        hist_path = (
+            _resolve_path(Path(history_log_path) if history_log_path else None, ckpt, "_history")
+            if log_history
+            else None
+        )
 
         logger = RunLogger(
             variable_names=self.space.names(),
@@ -809,9 +812,7 @@ class MultiObjective(HarmonySearchOptimizer):
             raise ValueError(f"resume must be 'auto', 'new', or 'resume'; got {resume!r}.")
 
         if should_resume:
-            import json as _json
-
-            payload = _json.loads(ckpt.read_text())
+            payload = json.loads(ckpt.read_text())
             start_iter = int(payload["iteration"])
             self._memory = HarmonyMemory.from_dict(payload["memory"])
             archive = ParetoArchive.from_dict(payload["archive"])
@@ -835,10 +836,12 @@ class MultiObjective(HarmonySearchOptimizer):
                     penalties=self._memory._penalty,
                 )
             if ckpt:
-                import json as _json2
-
-                payload0 = {"iteration": 0, "memory": self._memory.to_dict(), "archive": archive.to_dict()}
-                ckpt.write_text(_json2.dumps(payload0, indent=2))
+                payload0 = {
+                    "iteration": 0,
+                    "memory": self._memory.to_dict(),
+                    "archive": archive.to_dict(),
+                }
+                ckpt.write_text(json.dumps(payload0, indent=2))
 
         archive_history: List[int] = []
         t0 = time.perf_counter()
@@ -863,7 +866,7 @@ class MultiObjective(HarmonySearchOptimizer):
                 logger.log_evaluation(it + 1, new_h, objs[0], p)
 
                 if verbose:
-                    print(f"[MO-HS] iter {it + 1:>6d} | archive = {len(archive):>4d} solutions")
+                    print(f"[MO-HS] iter {it + 1:>6d} | " f"archive = {len(archive):>4d} solutions")
 
                 if callback is not None:
                     partial = ParetoResult(
@@ -875,14 +878,12 @@ class MultiObjective(HarmonySearchOptimizer):
                     callback(it + 1, partial)
 
                 if ckpt and (it + 1) % checkpoint_every == 0:
-                    import json as _json3
-
                     payload_it = {
                         "iteration": it + 1,
                         "memory": self._memory.to_dict(),
                         "archive": archive.to_dict(),
                     }
-                    ckpt.write_text(_json3.dumps(payload_it, indent=2))
+                    ckpt.write_text(json.dumps(payload_it, indent=2))
 
         except StopIteration:
             pass

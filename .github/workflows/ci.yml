@@ -17,13 +17,30 @@ jobs:
           python-version: "3.12"
       - name: Install ruff
         run: pip install ruff
-      - name: Run ruff
+      - name: Check formatting
+        run: ruff format --check harmonix/ tests/
+      - name: Check lint + isort
         run: ruff check harmonix/ tests/
+
+  typecheck:
+    name: Type check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install mypy
+          pip install -e .
+      - name: Run mypy
+        run: mypy harmonix/ --ignore-missing-imports --no-strict-optional
 
   test:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [lint, typecheck]
 
     strategy:
       fail-fast: false
@@ -40,5 +57,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
           pip install -e .
-      - name: Run tests
-        run: pytest tests/ -v --tb=short
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ -v --tb=short \
+            --ignore=tests/test_hypothesis.py \
+            --cov=harmonix \
+            --cov-report=term-missing \
+            --cov-report=xml
+      - name: Run hypothesis tests
+        run: |
+          pytest tests/test_hypothesis.py -v --tb=short
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false

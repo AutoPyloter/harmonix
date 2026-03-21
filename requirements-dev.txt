@@ -1,2 +1,14 @@
+# testing
 pytest>=7.0
+pytest-cov>=5.0
+pytest-xdist>=3.0
+hypothesis>=6.0
+
+# linting & formatting
 ruff>=0.4
+
+# type checking
+mypy>=1.0
+
+# git hooks
+pre-commit>=3.0
