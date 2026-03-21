@@ -30,12 +30,12 @@ result = Minimization(space, objective).optimize(
 print(result)
 ```
 
------
+---
 
 ## Installation
 
 ```bash
-pip install harmonix
+pip install harmonix-opt
 ```
 
 Requires Python 3.8+. No mandatory dependencies beyond the standard library.
@@ -47,7 +47,7 @@ pip install -r requirements-dev.txt
 pip install -e .
 ```
 
------
+---
 
 ## Core concepts
 
@@ -55,22 +55,22 @@ pip install -e .
 
 Every variable implements three methods that the algorithm calls internally:
 
-|Method                   |Purpose                                             |
-|-------------------------|----------------------------------------------------|
-|`sample(ctx)`            |Draw a random feasible value                        |
-|`filter(candidates, ctx)`|Keep only feasible values from harmony memory       |
-|`neighbor(value, ctx)`   |Return an adjacent feasible value (pitch adjustment)|
+| Method | Purpose |
+|--------|---------|
+| `sample(ctx)` | Draw a random feasible value |
+| `filter(candidates, ctx)` | Keep only feasible values from harmony memory |
+| `neighbor(value, ctx)` | Return an adjacent feasible value (pitch adjustment) |
 
 The `ctx` argument is a dict of all variable values assigned earlier in the same harmony. This enables **dependent bounds** — the domain of a variable can depend on previously assigned variables.
 
 ### Built-in variable types
 
-|Type                    |Domain              |
-|------------------------|--------------------|
-|`Continuous(lo, hi)`    |ℝ ∩ [lo, hi]        |
-|`Discrete(lo, step, hi)`|{lo, lo+step, …, hi}|
-|`Integer(lo, hi)`       |{lo, lo+1, …, hi}   |
-|`Categorical(choices)`  |finite label set    |
+| Type | Domain |
+|------|--------|
+| `Continuous(lo, hi)` | ℝ ∩ [lo, hi] |
+| `Discrete(lo, step, hi)` | {lo, lo+step, …, hi} |
+| `Integer(lo, hi)` | {lo, lo+1, …, hi} |
+| `Categorical(choices)` | finite label set |
 
 All bounds accept callables for dependent domains:
 
@@ -105,12 +105,12 @@ space.add("p", PrimeVariable(lo=2, hi=500))
 
 Full catalogue:
 
-|Category        |Types                                                                                                                    |
-|----------------|-------------------------------------------------------------------------------------------------------------------------|
-|**Mathematical**|`NaturalNumber`, `WholeNumber`, `NegativeInt`, `NegativeReal`, `PositiveReal`, `PrimeVariable`, `PowerOfTwo`, `Fibonacci`|
-|**Structural**  |`ACIRebar`, `ACIDoubleRebar`, `SteelSection`, `ConcreteGrade`                                                            |
-|**Geotechnical**|`SoilSPT`                                                                                                                |
-|**Seismic**     |`SeismicZoneTBDY`                                                                                                        |
+| Category | Types |
+|----------|-------|
+| **Mathematical** | `NaturalNumber`, `WholeNumber`, `NegativeInt`, `NegativeReal`, `PositiveReal`, `PrimeVariable`, `PowerOfTwo`, `Fibonacci` |
+| **Structural** | `ACIRebar`, `ACIDoubleRebar`, `SteelSection`, `ConcreteGrade` |
+| **Geotechnical** | `SoilSPT` |
+| **Seismic** | `SeismicZoneTBDY` |
 
 All types are also accessible via the plugin registry:
 
@@ -149,7 +149,7 @@ EvenVar = make_variable(
 space.add("n", EvenVar())
 ```
 
------
+---
 
 ## Optimisers
 
@@ -213,7 +213,7 @@ def my_callback(iteration, partial_result):
         raise StopIteration    # stops the loop cleanly
 ```
 
------
+---
 
 ## Advanced features
 
@@ -271,7 +271,7 @@ result = optimizer.optimize(
 
 All CSV files are readable directly in Excel or with `pandas.read_csv()`.
 
------
+---
 
 ## Decoding engineering variables
 
@@ -301,7 +301,7 @@ var = SteelSection(catalogue="my_sections.json")  # custom catalogue
 var = SteelSection(series=["HEA", "HEB"])          # filter series
 ```
 
------
+---
 
 ## Algorithm background
 
@@ -322,7 +322,7 @@ harmonix implements Harmony Search with several enhancements:
 - Deb, K. (2000). An efficient constraint handling method for genetic algorithms. *Computer Methods in Applied Mechanics and Engineering*, 186(2–4), 311–338.
 - Ricart, J., Hüttemann, G., Lima, J., & Barán, B. (2011). Multiobjective harmony search algorithm proposals. *Electronic Notes in Theoretical Computer Science*, 281, 51–67.
 
------
+---
 
 ## Testing
 
@@ -342,7 +342,7 @@ pytest tests/ -v
 - Determinism — same seed produces identical results
 - Numerical correctness — Sphere, Rosenbrock, constrained minimization
 
------
+---
 
 ## Project structure
 
@@ -373,7 +373,7 @@ harmonix/
 └── LICENSE
 ```
 
------
+---
 
 ## License
 
