@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Özcan"
+    given-names: "Abdulkadir"
+title: "harmonix-opt: Harmony Search optimisation with dependent variable spaces"
+version: 1.0.0
+date-released: 2026-03-22
+url: "https://github.com/AutoPyloter/harmonix"
+repository-code: "https://github.com/AutoPyloter/harmonix"
+keywords:
+  - harmony search
+  - metaheuristic
+  - optimization
+  - structural engineering
+  - multi-objective
+license: "MIT"
