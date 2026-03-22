@@ -4,7 +4,7 @@ authors:
   - family-names: "Özcan"
     given-names: "Abdulkadir"
 title: "harmonix-opt: Harmony Search optimisation with dependent variable spaces"
-version: 1.0.0
+version: 1.0.1
 date-released: 2026-03-22
 url: "https://github.com/AutoPyloter/harmonix"
 repository-code: "https://github.com/AutoPyloter/harmonix"
