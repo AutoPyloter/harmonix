@@ -7,7 +7,7 @@ name = "harmonix-opt"
 version = "1.0.0"
 description = "Harmony Search optimisation with dependent variable spaces and engineering domain catalogues"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Abdulkadir Özcan", email = "a.kdr.ozcn@gmail.com" }]
 requires-python = ">=3.8"
 keywords = [
@@ -30,7 +30,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Intended Audience :: Science/Research",
