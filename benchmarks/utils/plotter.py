@@ -282,7 +282,6 @@ class ConvergencePlotter:
             fitness_draw = list(fitness_values)
             y_pen_zero_phys = None
             y_pen_max_phys = None
-            first_feasible_fitness_ref: Optional[float] = None
 
         elif first_zero_idx == -1:
             # Scenario 2: never reached feasibility — no fitness curve
@@ -291,11 +290,9 @@ class ConvergencePlotter:
             min_fitness = None
             last_fitness = None
             y_pen_zero_phys = None
-            first_feasible_fitness_ref = None
 
         else:
             # Scenario 3: transition — shift penalties up by first feasible
-            first_feasible_fitness_ref = first_feasible_fitness
             for i, rec in enumerate(self.iterations_data):
                 if i <= first_zero_idx:
                     penalties_draw.append(rec.penalty + first_feasible_fitness)

@@ -23,33 +23,37 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from harmonix import (
-    DesignSpace, Minimization,
-    Variable, register_variable, make_variable,
+    DesignSpace,
+    Minimization,
+    Variable,
+    make_variable,
+    register_variable,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helper: sieve of Eratosthenes
 # ---------------------------------------------------------------------------
 
+
 def sieve(limit: int):
     is_p = bytearray([1]) * (limit + 1)
     is_p[0] = is_p[1] = 0
-    for i in range(2, int(limit ** 0.5) + 1):
+    for i in range(2, int(limit**0.5) + 1):
         if is_p[i]:
             is_p[i * i :: i] = bytearray(len(is_p[i * i :: i]))
     return [i for i, v in enumerate(is_p) if v]
 
 
-PRIMES     = sieve(500)
-PRIME_SET  = set(PRIMES)
+PRIMES = sieve(500)
+PRIME_SET = set(PRIMES)
 TWIN_PAIRS = [(p, p + 2) for p in PRIMES if p + 2 in PRIME_SET and p <= 500]
-TWIN_FIRSTS  = [p for p, _ in TWIN_PAIRS]   # first of each twin prime pair
+TWIN_FIRSTS = [p for p, _ in TWIN_PAIRS]  # first of each twin prime pair
 
 
 # ---------------------------------------------------------------------------
 # Method 1: subclass Variable
 # ---------------------------------------------------------------------------
+
 
 @register_variable("twin_prime_first")
 class TwinPrimeVariable(Variable):
@@ -75,7 +79,7 @@ class TwinPrimeVariable(Variable):
     def neighbor(self, value, ctx) -> int:
         if value not in self._value_set:
             return self.sample(ctx)
-        idx   = self._values.index(value)
+        idx = self._values.index(value)
         delta = random.choice([-1, 1])
         new_i = max(0, min(len(self._values) - 1, idx + delta))
         return self._values[new_i]
@@ -94,14 +98,12 @@ FIB = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
 FIB_SET = set(FIB)
 
 FibonacciVar = make_variable(
-    sample   = lambda ctx: random.choice(FIB),
-    filter   = lambda cands, ctx: [c for c in cands if c in FIB_SET],
-    neighbor = lambda val, ctx: FIB[
-        max(0, min(len(FIB) - 1,
-            FIB.index(val) + random.choice([-1, 1])
-            if val in FIB_SET else 0))
+    sample=lambda ctx: random.choice(FIB),
+    filter=lambda cands, ctx: [c for c in cands if c in FIB_SET],
+    neighbor=lambda val, ctx: FIB[
+        max(0, min(len(FIB) - 1, FIB.index(val) + random.choice([-1, 1]) if val in FIB_SET else 0))
     ],
-    name     = "fibonacci_200",
+    name="fibonacci_200",
 )
 
 
@@ -117,15 +119,15 @@ space1 = DesignSpace()
 twin_var = TwinPrimeVariable(lo=3, hi=300)
 space1.add("p", twin_var)
 
+
 def twin_objective(h):
     p = h["p"]
     q = p + 2
     fitness = abs(p - 100) + abs(q - 100)
     return fitness, 0.0
 
-result1 = Minimization(space1, twin_objective).optimize(
-    memory_size=15, max_iter=500, verbose=False
-)
+
+result1 = Minimization(space1, twin_objective).optimize(memory_size=15, max_iter=500, verbose=False)
 
 p_best = result1.best_harmony["p"]
 q_best = p_best + 2
@@ -146,9 +148,7 @@ print("=" * 55)
 space2 = DesignSpace()
 space2.add("f", FibonacciVar())
 
-result2 = Minimization(space2, lambda h: (abs(h["f"] - 100), 0.0)).optimize(
-    memory_size=10, max_iter=200, verbose=False
-)
+result2 = Minimization(space2, lambda h: (abs(h["f"] - 100), 0.0)).optimize(memory_size=10, max_iter=200, verbose=False)
 
 print(result2)
 print(f"Closest Fibonacci to 100: {result2.best_harmony['f']}")

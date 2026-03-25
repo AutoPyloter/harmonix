@@ -35,12 +35,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import DesignSpace, Continuous, MultiObjective
+from harmonix import Continuous, DesignSpace, MultiObjective
 
 # ---------------------------------------------------------------------------
 # Search space
 # ---------------------------------------------------------------------------
-N = 5   # number of decision variables
+N = 5  # number of decision variables
 
 space = DesignSpace()
 space.add("x1", Continuous(0.0, 1.0))
@@ -52,11 +52,11 @@ for i in range(2, N + 1):
 # Objective
 # ---------------------------------------------------------------------------
 def zdt1(h):
-    x1   = h["x1"]
+    x1 = h["x1"]
     rest = [h[f"x{i}"] for i in range(2, N + 1)]
-    g    = 1.0 + 9.0 * sum(rest) / (N - 1)
-    f1   = x1
-    f2   = g * (1.0 - math.sqrt(x1 / g))
+    g = 1.0 + 9.0 * sum(rest) / (N - 1)
+    f1 = x1
+    f2 = g * (1.0 - math.sqrt(x1 / g))
     return (f1, f2), 0.0
 
 
@@ -64,6 +64,7 @@ def zdt1(h):
 # Optional: per-iteration callback to track progress
 # ---------------------------------------------------------------------------
 milestones = []
+
 
 def on_iteration(iteration, partial):
     if iteration % 1000 == 0:
@@ -77,13 +78,13 @@ if __name__ == "__main__":
     optimizer = MultiObjective(space, zdt1)
 
     result = optimizer.optimize(
-        memory_size  = 30,
-        hmcr         = 0.85,
-        par          = 0.35,
-        max_iter     = 10_000,
-        archive_size = 100,
-        callback     = on_iteration,
-        verbose      = False,
+        memory_size=30,
+        hmcr=0.85,
+        par=0.35,
+        max_iter=10_000,
+        archive_size=100,
+        callback=on_iteration,
+        verbose=False,
     )
 
     # --- Results ----------------------------------------------------------
@@ -96,8 +97,8 @@ if __name__ == "__main__":
     # --- Approximation quality -------------------------------------------
     errors = []
     for entry in result.front:
-        f1, f2    = entry.objectives
-        true_f2   = 1.0 - math.sqrt(max(0.0, f1))
+        f1, f2 = entry.objectives
+        true_f2 = 1.0 - math.sqrt(max(0.0, f1))
         errors.append(abs(f2 - true_f2))
 
     mean_err = sum(errors) / len(errors) if errors else float("inf")

@@ -29,4 +29,3 @@ The Dependent Space method (Iter Mean: 7,664) appears to take more iterations to
 
 ### Welded Beam: Higher Variance in Dependent Space
 Welded Beam shows a notably higher standard deviation in Dependent Space (σ=0.2681) compared to Static Penalty (σ=0.3021 — comparable but still high). The Welded Beam problem has only *partial* constraint embedding (g2, g3, g5, g6 are embedded; g1, g4, g7 remain as penalties). The residual penalty terms involve combined shear (g1) and buckling load (g7) which are non-linear and create rugged fitness landscapes, causing stochastic variance between independent runs. This problem is a candidate for deeper dependency embedding to further reduce variance.
-
