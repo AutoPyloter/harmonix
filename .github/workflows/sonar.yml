@@ -1,0 +1,33 @@
+name: Sonar Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonar-scan:
+    name: Code Quality and Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Adım: Kodu Github'dan çekiyoruz
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # DİKKAT: Sonar'ın kod geçmişini (blame) analiz edebilmesi için bu şarttır, "0" olmalı!
+
+      # --- SEÇENEK A: Kendi SonarQube Sunucun Varsa (Senin bulduğun eklenti) ---
+      - name: Official SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} # Kendi sunucunun adresi
+
+      # --- SEÇENEK B: Açık Kaynak Projeler İçin Ücretsiz SonarCloud Kullanacaksan ---
+      # - name: Official SonarCloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@v2.1.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Github pull request'lerine yorum yapabilmesi için
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
