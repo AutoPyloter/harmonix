@@ -12,6 +12,7 @@
 [![Downloads](https://static.pepy.tech/badge/harmonix-opt/month)](https://pepy.tech/project/harmonix-opt)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/harmonix-opt.svg)](https://pypi.org/project/harmonix-opt/)
 [![GitHub Repo stars](https://img.shields.io/github/stars/AutoPyloter/harmonix?style=social)](https://github.com/AutoPyloter/harmonix/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 **Harmony Search optimisation with dependent variable spaces and engineering domain catalogues.**
 
