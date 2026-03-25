@@ -21,6 +21,7 @@ from harmonix.spaces.engineering import (
     SeismicZoneTBDY,
     SoilSPT,
     SteelSection,
+    _aci_limits,
     _load_catalogue_from_file,
 )
 from harmonix.spaces.math import (
@@ -253,7 +254,10 @@ class TestACIRebar:
 
     def test_filter_removes_invalid(self):
         codes = self.var._valid_codes({})
-        assert all(c in codes for c in self.var.filter(codes, {}))
+        filtered = self.var.filter(codes + [-1, 999999], {})
+        assert -1 not in filtered
+        assert 999999 not in filtered
+        assert all(c in codes for c in filtered)
 
     def test_neighbor_stays_valid(self):
         code = self.var.sample({})
@@ -294,6 +298,15 @@ class TestACIRebar:
     def test_neighbor_returns_same_value_when_invalid(self):
         assert self.var.neighbor(-1, {}) == -1
 
+    def test_neighbor_returns_same_value_when_no_adjacent_valid_codes(self, monkeypatch):
+        code = self.var.sample({})
+        monkeypatch.setattr(self.var, "_valid_codes", lambda ctx: [code])
+        assert self.var.neighbor(code, {}) == code
+
+    def test_aci_limits_high_fc_uses_minimum_beta1(self):
+        beta1, *_ = _aci_limits(56.0, 420.0)
+        assert beta1 == pytest.approx(0.65)
+
 
 class TestACIDoubleRebar:
     def test_sample_not_none(self):
@@ -311,6 +324,11 @@ class TestACIDoubleRebar:
     def test_neighbor_returns_same_value_when_invalid(self):
         var = ACIDoubleRebar(d1_expr=0.55, d2_expr=0.48, cc_expr=40.0)
         assert var.neighbor(-1, {}) == -1
+
+    def test_filter_removes_invalid_candidates(self):
+        var = ACIDoubleRebar(d1_expr=0.55, d2_expr=0.48, cc_expr=40.0)
+        filtered = var.filter([-1, 999999], {})
+        assert filtered == []
 
     def test_describe(self):
         var = ACIDoubleRebar(d1_expr=0.55, d2_expr=0.48, cc_expr=40.0)
@@ -415,6 +433,31 @@ class TestSteelSection:
         with pytest.raises(ValueError):
             _load_catalogue_from_file(bad_path)
 
+    def test_constructor_loads_catalogue_from_file(self, tmp_path):
+        rows = [
+            {
+                "name": "X 1",
+                "series": "X",
+                "h_mm": 100,
+                "b_mm": 50,
+                "tf_mm": 5,
+                "tw_mm": 5,
+                "A_cm2": 10,
+                "Iy_cm4": 20,
+                "Wy_cm3": 4,
+                "Iz_cm4": 5,
+                "Wz_cm3": 1,
+                "mass_kg_m": 7,
+            }
+        ]
+        json_path = tmp_path / "sections.json"
+        json_path.write_text(json.dumps(rows))
+
+        var = SteelSection(series="X", catalogue=str(json_path))
+
+        assert len(var.sections) == 1
+        assert var.decode(0).name == "X 1"
+
 
 class TestConcreteGrade:
     def test_sample_in_range(self):
@@ -428,6 +471,11 @@ class TestConcreteGrade:
         var = ConcreteGrade()
         result = var.filter(var._indices, {})
         assert set(result) == set(var._indices)
+
+    def test_filter_removes_out_of_range(self):
+        var = ConcreteGrade()
+        result = var.filter([-1, 999, var._indices[0]], {})
+        assert result == [var._indices[0]]
 
     def test_neighbor_valid(self):
         var = ConcreteGrade()
