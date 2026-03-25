@@ -11,8 +11,8 @@
   <a href="https://codecov.io/github/AutoPyloter/harmonix"><img src="https://codecov.io/github/AutoPyloter/harmonix/graph/badge.svg?token=H93FEVMFLS&style=flat-square" alt="Codecov"></a>
   <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" alt="Ruff"></a>
   <a href="https://mypy-lang.org/"><img src="https://www.mypy-lang.org/static/mypy_badge.svg?style=flat-square" alt="Checked with mypy"></a>
-  <br>
   <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=flat-square" alt="pre-commit"></a>
+  <br>
 
   <a href="https://pepy.tech/project/harmonix-opt"><img src="https://static.pepy.tech/badge/harmonix-opt/month?style=flat-square" alt="Downloads/Month"></a>
   <a href="https://github.com/AutoPyloter/harmonix/stargazers"><img src="https://img.shields.io/github/stars/AutoPyloter/harmonix?style=social" alt="GitHub Repo stars"></a>
