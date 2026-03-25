@@ -10,6 +10,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Downloads](https://static.pepy.tech/badge/harmonix-opt)](https://pepy.tech/project/harmonix-opt)
 [![Downloads](https://static.pepy.tech/badge/harmonix-opt/month)](https://pepy.tech/project/harmonix-opt)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/harmonix-opt.svg)](https://pypi.org/project/harmonix-opt/)
 
 **Harmony Search optimisation with dependent variable spaces and engineering domain catalogues.**
 
