@@ -4,6 +4,8 @@ tests/test_spaces.py
 Tests for harmonix.spaces — math and engineering domain spaces.
 """
 
+import json
+import random
 import sys
 from pathlib import Path
 
@@ -15,9 +17,11 @@ from harmonix.spaces.engineering import (
     ACIDoubleRebar,
     ACIRebar,
     ConcreteGrade,
+    SectionProperties,
     SeismicZoneTBDY,
     SoilSPT,
     SteelSection,
+    _load_catalogue_from_file,
 )
 from harmonix.spaces.math import (
     Fibonacci,
@@ -28,6 +32,9 @@ from harmonix.spaces.math import (
     PowerOfTwo,
     PrimeVariable,
     WholeNumber,
+    _fibonacci_in_range,
+    _powers_of_two_in_range,
+    _sieve,
 )
 
 # ---------------------------------------------------------------------------
@@ -101,6 +108,13 @@ class TestNegativeReal:
         with pytest.raises(ValueError):
             NegativeReal(lo=0.0)
 
+    def test_filter_and_neighbor_clamp(self):
+        v = NegativeReal(lo=-10.0)
+        assert v.filter([-10.0, -5.0, 0.0, 1.0], {}) == [-10.0, -5.0]
+        for _ in range(20):
+            nb = v.neighbor(-1e-9, {})
+            assert -10.0 <= nb <= -1e-9
+
 
 class TestPositiveReal:
     def test_all_positive(self):
@@ -111,6 +125,13 @@ class TestPositiveReal:
     def test_hi_must_be_positive(self):
         with pytest.raises(ValueError):
             PositiveReal(hi=-1.0)
+
+    def test_filter_and_neighbor_clamp(self):
+        v = PositiveReal(hi=10.0)
+        assert v.filter([-1.0, 0.0, 1e-9, 3.0, 11.0], {}) == [1e-9, 3.0]
+        for _ in range(20):
+            nb = v.neighbor(10.0, {})
+            assert 1e-9 <= nb <= 10.0
 
 
 class TestPrimeVariable:
@@ -150,6 +171,11 @@ class TestPrimeVariable:
         with pytest.raises(ValueError):
             PrimeVariable(lo=14, hi=16)  # no primes between 14 and 16
 
+    def test_invalid_neighbor_falls_back_to_sample(self, monkeypatch):
+        v = PrimeVariable(hi=20)
+        monkeypatch.setattr(random, "choice", lambda seq: seq[-1])
+        assert v.neighbor(4, {}) == v._primes[-1]
+
 
 class TestPowerOfTwo:
     def test_all_powers(self):
@@ -167,6 +193,11 @@ class TestPowerOfTwo:
         with pytest.raises(ValueError):
             PowerOfTwo(lo=5, hi=6)  # no powers of two in [5,6]
 
+    def test_invalid_neighbor_falls_back_to_sample(self, monkeypatch):
+        v = PowerOfTwo(hi=64)
+        monkeypatch.setattr(random, "choice", lambda seq: seq[0])
+        assert v.neighbor(3, {}) == 1
+
 
 class TestFibonacci:
     def test_all_fibonacci(self):
@@ -179,6 +210,22 @@ class TestFibonacci:
         v = Fibonacci(hi=20)
         result = v.filter([1, 2, 4, 5, 7, 8], {})
         assert set(result) == {1, 2, 5, 8}
+
+    def test_invalid_neighbor_falls_back_to_sample(self, monkeypatch):
+        v = Fibonacci(hi=20)
+        monkeypatch.setattr(random, "choice", lambda seq: seq[-1])
+        assert v.neighbor(4, {}) == v._values[-1]
+
+
+class TestMathHelpers:
+    def test_sieve_small_limit(self):
+        assert _sieve(1) == []
+
+    def test_fibonacci_range_can_include_zero(self):
+        assert _fibonacci_in_range(0, 3) == [0, 1, 1, 2, 3]
+
+    def test_powers_of_two_range(self):
+        assert _powers_of_two_in_range(3, 20) == [4, 8, 16]
 
 
 # ---------------------------------------------------------------------------
@@ -230,6 +277,23 @@ class TestACIRebar:
         assert "bars" in desc
         assert "mm" in desc
 
+    def test_fc_fy_properties_with_callables(self):
+        var = ACIRebar(
+            d_expr=0.55,
+            cc_expr=40.0,
+            fc=lambda ctx: 30.0,
+            fy=lambda ctx: 420.0,
+        )
+        assert var.fc is None
+        assert var.fy is None
+
+    def test_sample_returns_none_when_geometry_is_infeasible(self):
+        var = ACIRebar(d_expr=0.02, cc_expr=200.0, fc=30.0, fy=420.0)
+        assert var.sample({}) is None
+
+    def test_neighbor_returns_same_value_when_invalid(self):
+        assert self.var.neighbor(-1, {}) == -1
+
 
 class TestACIDoubleRebar:
     def test_sample_not_none(self):
@@ -243,6 +307,15 @@ class TestACIDoubleRebar:
         if code is not None:
             dia, n = var.decode(code)
             assert dia > 0 and n >= 4
+
+    def test_neighbor_returns_same_value_when_invalid(self):
+        var = ACIDoubleRebar(d1_expr=0.55, d2_expr=0.48, cc_expr=40.0)
+        assert var.neighbor(-1, {}) == -1
+
+    def test_describe(self):
+        var = ACIDoubleRebar(d1_expr=0.55, d2_expr=0.48, cc_expr=40.0)
+        code = var.sample({})
+        assert "double row" in var.describe(code)
 
 
 class TestSteelSection:
@@ -291,6 +364,57 @@ class TestSteelSection:
         desc = var.describe(idx)
         assert "IPE" in desc
 
+    def test_neighbor_invalid_index_falls_back_to_sample(self, monkeypatch):
+        var = SteelSection(series="IPE")
+        monkeypatch.setattr(random, "choice", lambda seq: seq[0])
+        assert var.neighbor(999, {}) == 0
+
+    def test_sections_property_returns_copy(self):
+        var = SteelSection(series="IPE")
+        sections = var.sections
+        sections.pop()
+        assert len(sections) + 1 == len(var.sections)
+
+    def test_custom_catalogue_list(self):
+        catalogue = [
+            SectionProperties("X 1", "X", 100, 50, 5, 5, 10, 20, 4, 5, 1, 7),
+            SectionProperties("X 2", "X", 120, 60, 6, 6, 12, 30, 5, 6, 2, 8),
+        ]
+        var = SteelSection(series="X", catalogue=catalogue)
+        assert len(var.sections) == 2
+
+    def test_custom_catalogue_json_and_csv(self, tmp_path):
+        rows = [
+            {
+                "name": "X 1",
+                "series": "X",
+                "h_mm": 100,
+                "b_mm": 50,
+                "tf_mm": 5,
+                "tw_mm": 5,
+                "A_cm2": 10,
+                "Iy_cm4": 20,
+                "Wy_cm3": 4,
+                "Iz_cm4": 5,
+                "Wz_cm3": 1,
+                "mass_kg_m": 7,
+            }
+        ]
+        json_path = tmp_path / "sections.json"
+        csv_path = tmp_path / "sections.csv"
+        bad_path = tmp_path / "sections.txt"
+        json_path.write_text(json.dumps(rows))
+        csv_path.write_text(
+            "name,series,h_mm,b_mm,tf_mm,tw_mm,A_cm2,Iy_cm4,Wy_cm3,Iz_cm4,Wz_cm3,mass_kg_m\n"
+            "X 1,X,100,50,5,5,10,20,4,5,1,7\n"
+        )
+        bad_path.write_text("invalid")
+
+        assert _load_catalogue_from_file(json_path)[0].name == "X 1"
+        assert _load_catalogue_from_file(csv_path)[0].series == "X"
+        with pytest.raises(ValueError):
+            _load_catalogue_from_file(bad_path)
+
 
 class TestConcreteGrade:
     def test_sample_in_range(self):
@@ -322,6 +446,10 @@ class TestConcreteGrade:
         with pytest.raises(ValueError):
             ConcreteGrade(min_grade="C50/60", max_grade="C25/30")
 
+    def test_describe(self):
+        var = ConcreteGrade()
+        assert "fck=" in var.describe(var.sample({}))
+
 
 class TestSoilSPT:
     def test_sample_valid(self):
@@ -345,6 +473,11 @@ class TestSoilSPT:
         idx = var.sample({})
         desc = var.describe(idx)
         assert "N=" in desc
+
+    def test_neighbor_valid(self):
+        var = SoilSPT()
+        idx = var.sample({})
+        assert var.neighbor(idx, {}) in var._indices
 
 
 class TestSeismicZoneTBDY:
@@ -382,6 +515,12 @@ class TestSeismicZoneTBDY:
         idx = var.sample({})
         desc = var.describe(idx)
         assert "SDS=" in desc
+
+    def test_neighbor_invalid_value_falls_back_to_first_ordered(self, monkeypatch):
+        var = SeismicZoneTBDY(hazard_levels=["DD-2"], site_classes=["ZC"])
+        monkeypatch.setattr(random, "choice", lambda seq: seq[0])
+        ordered = sorted(var._indices, key=lambda i: var._zones[i].SDS)
+        assert var.neighbor(999, {}) == ordered[0]
 
 
 # ---------------------------------------------------------------------------

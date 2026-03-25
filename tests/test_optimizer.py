@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from harmonix.optimizer import (
     HarmonyMemory,
+    HarmonySearchOptimizer,
     Maximization,
     Minimization,
     MultiObjective,
@@ -99,6 +100,18 @@ class TestOptimizationResult:
             elapsed_seconds=0.5,
         )
         assert "3.14" in repr(r)
+
+
+class TestHarmonySearchOptimizerBase:
+    def test_optimize_not_implemented(self):
+        space = DesignSpace()
+        space.add("x", Continuous(0.0, 1.0))
+        opt = HarmonySearchOptimizer(space, lambda h: (h["x"], 0.0))
+        try:
+            opt.optimize()
+            assert False, "Expected NotImplementedError"
+        except NotImplementedError:
+            assert True
 
 
 # ---------------------------------------------------------------------------
@@ -227,6 +240,36 @@ class TestMinimization:
 
         result = Minimization(space, obj).optimize(memory_size=10, max_iter=200)
         assert result.best_harmony["n"] == 7.0
+
+    def test_verbose_prints_iteration_progress(self, capsys):
+        space = self._sphere_space()
+        Minimization(space, self._sphere_obj).optimize(memory_size=5, max_iter=3, verbose=True)
+        out = capsys.readouterr().out
+        assert "[HS] iter" in out
+
+    def test_verbose_prints_resume_message(self, tmp_path, capsys):
+        space = self._sphere_space()
+        ckpt = tmp_path / "resume_min.json"
+
+        Minimization(space, self._sphere_obj).optimize(
+            memory_size=5,
+            max_iter=2,
+            checkpoint_path=ckpt,
+            checkpoint_every=2,
+            resume="new",
+        )
+        capsys.readouterr()
+
+        Minimization(space, self._sphere_obj).optimize(
+            memory_size=5,
+            max_iter=4,
+            checkpoint_path=ckpt,
+            checkpoint_every=4,
+            resume="resume",
+            verbose=True,
+        )
+        out = capsys.readouterr().out
+        assert "[HS] Resumed from checkpoint at iteration 2." in out
 
 
 # ---------------------------------------------------------------------------
@@ -390,6 +433,42 @@ class TestMultiObjective:
         result = MultiObjective(space, tri_obj).optimize(memory_size=10, max_iter=50, archive_size=20)
         assert isinstance(result, ParetoResult)
         assert all(len(e.objectives) == 3 for e in result.front)
+
+    def test_falls_back_to_improvise_when_archive_is_empty(self, monkeypatch):
+        space = DesignSpace()
+        space.add("x", Continuous(0.0, 1.0))
+        opt = MultiObjective(space, lambda h: ((h["x"], 1.0 - h["x"]), 1.0))
+
+        calls = {"plain": 0, "archive": 0}
+
+        def fake_improvise(hmcr, par, bw=0.05):
+            calls["plain"] += 1
+            return {"x": 0.25}
+
+        def fake_improvise_from_archive(hmcr, par, archive, bw=0.05):
+            calls["archive"] += 1
+            return {"x": 0.75}
+
+        monkeypatch.setattr(opt, "_improvise", fake_improvise)
+        monkeypatch.setattr(opt, "_improvise_from_archive", fake_improvise_from_archive)
+
+        result = opt.optimize(memory_size=4, max_iter=1, archive_size=10, resume="new")
+
+        assert result.iterations == 1
+        assert calls["plain"] == 1
+        assert calls["archive"] == 0
+
+    def test_multiobjective_verbose_prints_iteration_progress(self, capsys):
+        space = DesignSpace()
+        space.add("x", Continuous(0.0, 1.0))
+        space.add("y", Continuous(0.0, 1.0))
+
+        def bi_obj(h):
+            return (h["x"], 1.0 - h["y"]), 0.0
+
+        MultiObjective(space, bi_obj).optimize(memory_size=5, max_iter=3, archive_size=10, verbose=True)
+        out = capsys.readouterr().out
+        assert "[MO-HS] iter" in out
 
 
 # ---------------------------------------------------------------------------
