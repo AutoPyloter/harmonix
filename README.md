@@ -16,6 +16,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/AutoPyloter/harmonix)](https://github.com/AutoPyloter/harmonix/commits/main)
 [![GitHub issues](https://img.shields.io/github/issues/AutoPyloter/harmonix)](https://github.com/AutoPyloter/harmonix/issues)
 [![GitHub repo size](https://img.shields.io/github/repo-size/AutoPyloter/harmonix)]()
+[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
 **Harmony Search optimisation with dependent variable spaces and engineering domain catalogues.**
 
