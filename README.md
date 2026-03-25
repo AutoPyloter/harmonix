@@ -6,7 +6,7 @@
   <a href="https://pypi.org/project/harmonix-opt/"><img src="https://img.shields.io/pypi/wheel/harmonix-opt?style=flat-square&color=blue" alt="PyPI Wheel"></a>
   <br>
   
-  <a href="https://github.com/AutoPyloter/harmonix/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AutoPyloter/harmonix/ci.yml?branch=main&style=flat-square" alt="CI Status"></a>
+  <a href="https://github.com/AutoPyloter/harmonix/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AutoPyloter/harmonix/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
   <a href="#testing"><img src="https://img.shields.io/badge/tests-325%20passed-brightgreen?style=flat-square" alt="Tests"></a>
   <a href="https://codecov.io/github/AutoPyloter/harmonix"><img src="https://codecov.io/github/AutoPyloter/harmonix/graph/badge.svg?token=H93FEVMFLS&style=flat-square" alt="Codecov"></a>
   <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" alt="Ruff"></a>
