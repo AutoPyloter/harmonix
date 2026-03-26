@@ -1,8 +1,8 @@
 """
-harmonix.spaces.engineering
+hsds.spaces.engineering
 ====================================
 Engineering search spaces — variable types whose feasibility rules
-are governed by structural-engineering standards and material catalogues.
+are governed by structural-engineering standards and material catalogs.
 
 +----------------------+----------------------+----------------------------------+
 | Class                | Registry name        | Domain                           |
@@ -11,7 +11,7 @@ are governed by structural-engineering standards and material catalogues.
 +----------------------+----------------------+----------------------------------+
 | ``ACIDoubleRebar``   | ``aci_rebar_double`` | ACI 318 double-row arrangements  |
 +----------------------+----------------------+----------------------------------+
-| ``SteelSection``     | ``steel_section``    | IPE / HEA / HEB / W catalogue    |
+| ``SteelSection``     | ``steel_section``    | IPE / HEA / HEB / W catalog    |
 +----------------------+----------------------+----------------------------------+
 | ``ConcreteGrade``    | ``concrete_grade``   | EN 206 strength classes          |
 +----------------------+----------------------+----------------------------------+
@@ -52,8 +52,8 @@ Usage
 -----
 .. code-block:: python
 
-    from harmonix import DesignSpace
-    from harmonix.spaces.engineering import ACIRebar
+    from hsds import DesignSpace
+    from hsds.spaces.engineering import ACIRebar
 
     space = DesignSpace()
     space.add("d",     Continuous(0.40, 0.80))   # effective depth [m]
@@ -291,7 +291,7 @@ class ACIRebar(_DynamicGridVariable):
 
     Examples
     --------
-    >>> from harmonix.spaces.engineering import ACIRebar
+    >>> from hsds.spaces.engineering import ACIRebar
     >>> var = ACIRebar(d_expr=0.55, cc_expr=40.0)
     >>> code = var.sample({})
     >>> dia, n = var.decode(code)
@@ -674,7 +674,7 @@ def _load_catalogue_from_file(path) -> List[SectionProperties]:
 @register_variable("steel_section")
 class SteelSection(CatalogueVariable):
     """
-    Variable whose domain is a catalogue of standard steel sections.
+    Variable whose domain is a catalog of standard steel sections.
 
     The value stored in the harmony is an **index** into the section list
     (integer).  Use :meth:`decode` to retrieve the full
@@ -686,9 +686,9 @@ class SteelSection(CatalogueVariable):
         Restrict the domain to one or more section families, e.g.
         ``"IPE"``, ``["HEA", "HEB"]``.  ``None`` means all series.
     catalogue : list[SectionProperties] | str | Path, optional
-        Custom catalogue.  Pass a list of :class:`SectionProperties`,
+        Custom catalog.  Pass a list of :class:`SectionProperties`,
         or a path to a ``.json`` / ``.csv`` file.  When omitted the
-        built-in EN 10365 + AISC catalogue is used.
+        built-in EN 10365 + AISC catalog is used.
 
     Examples
     --------
@@ -697,7 +697,7 @@ class SteelSection(CatalogueVariable):
     >>> sec = var.decode(idx)
     >>> print(sec.name, sec.iy_cm4)
 
-    Using a custom catalogue file:
+    Using a custom catalog file:
 
     >>> var = SteelSection(catalogue="my_sections.json")
     """
@@ -730,7 +730,7 @@ class SteelSection(CatalogueVariable):
         self._indices = list(range(len(self._sections)))
 
     def neighbor(self, value: int, ctx: Context) -> int:
-        """Move one step up or down in the catalogue (sorted by mass)."""
+        """Move one step up or down in the catalog (sorted by mass)."""
         return super().neighbor(value, ctx)
 
     def decode(self, index: int) -> SectionProperties:

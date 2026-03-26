@@ -7,7 +7,7 @@ for multi-objective Harmony Search.
 Terminology
 -----------
 * **Objective vector**: a tuple of scalar fitness values, one per objective.
-  All objectives are assumed to be *minimised*; negate maximised objectives
+  All objectives are assumed to be *minimized*; negate maximized objectives
   in the user's ``objective`` function.
 * **Dominance**: solution *a* dominates *b* (written a ≻ b) when
   ``a[i] <= b[i]`` for all objectives and ``a[i] < b[i]`` for at least one.

@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.registry import (
+from hsds.registry import (
     VariableAlreadyRegisteredError,
     VariableNotFoundError,
     create_variable,
@@ -22,7 +22,7 @@ from harmonix.registry import (
     register_variable,
     unregister_variable,
 )
-from harmonix.variables import Variable
+from hsds.variables import Variable
 
 # ---------------------------------------------------------------------------
 # Built-in registrations
@@ -36,8 +36,8 @@ class TestBuiltinRegistrations:
             assert name in types
 
     def test_engineering_spaces_registered(self):
-        # Importing harmonix triggers space registration
-        import harmonix  # noqa: F401
+        # Importing hsds triggers space registration
+        import hsds  # noqa: F401
 
         types = list_variable_types()
         for name in ("aci_rebar", "steel_section", "concrete_grade", "soil_spt", "seismic_tbdy", "prime", "natural"):

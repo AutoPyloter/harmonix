@@ -41,11 +41,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.logging import EvaluationCache
-from harmonix.optimizer import HarmonyMemory, Maximization, Minimization, MultiObjective
-from harmonix.pareto import ParetoArchive
-from harmonix.space import DesignSpace
-from harmonix.variables import Categorical, Continuous, Discrete, Integer
+from hsds.logging import EvaluationCache
+from hsds.optimizer import HarmonyMemory, Maximization, Minimization, MultiObjective
+from hsds.pareto import ParetoArchive
+from hsds.space import DesignSpace
+from hsds.variables import Categorical, Continuous, Discrete, Integer
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -355,12 +355,12 @@ class TestErrorMessages:
     def test_resume_error_contains_path(self):
         space = DesignSpace()
         space.add("x", Continuous(0.0, 1.0))
-        fake_path = "/tmp/_harmonix_does_not_exist_12345.json"
+        fake_path = "/tmp/_hsds_does_not_exist_12345.json"
         with pytest.raises(FileNotFoundError) as exc_info:
             Minimization(space, lambda h: (h["x"], 0.0)).optimize(
                 memory_size=5, max_iter=5, checkpoint_path=fake_path, resume="resume"
             )
-        assert "_harmonix_does_not_exist_12345" in str(exc_info.value)
+        assert "_hsds_does_not_exist_12345" in str(exc_info.value)
 
     def test_resume_invalid_value_error(self):
         space = DesignSpace()
@@ -598,7 +598,7 @@ class TestIntegrationCorners:
 class TestEngineeringPhysics:
     def test_concrete_grade_fcm_formula(self):
         """EC2: fcm = fck + 8 MPa."""
-        from harmonix.spaces.engineering import ConcreteGrade
+        from hsds.spaces.engineering import ConcreteGrade
 
         var = ConcreteGrade()
         for idx in var._indices:
@@ -609,7 +609,7 @@ class TestEngineeringPhysics:
 
     def test_concrete_grade_ecm_formula(self):
         """EC2: Ecm = 22 * (fcm/10)^0.3 GPa."""
-        from harmonix.spaces.engineering import ConcreteGrade
+        from hsds.spaces.engineering import ConcreteGrade
 
         var = ConcreteGrade()
         for idx in var._indices:
@@ -621,7 +621,7 @@ class TestEngineeringPhysics:
 
     def test_aci_rebar_all_valid_codes_satisfy_rho(self):
         """_valid_codes içindeki her kod _bar_is_valid_single'dan geçmeli."""
-        from harmonix.spaces.engineering import (
+        from hsds.spaces.engineering import (
             _AREAS_50,
             _COUNTS,
             _DIAMETERS,
@@ -660,7 +660,7 @@ class TestEngineeringPhysics:
 
     def test_aci_rebar_higher_fc_allows_more_codes(self):
         """Daha yüksek fc → daha geniş geçerli kod seti."""
-        from harmonix.spaces.engineering import ACIRebar
+        from hsds.spaces.engineering import ACIRebar
 
         var_low = ACIRebar(d_expr=0.40, cc_expr=0.06, fc=20.0, fy=420.0)
         var_high = ACIRebar(d_expr=0.40, cc_expr=0.06, fc=50.0, fy=420.0)
@@ -670,7 +670,7 @@ class TestEngineeringPhysics:
 
     def test_steel_section_wy_approx(self):
         """Wy ≈ Iy / (h/2) — tolerans %20."""
-        from harmonix.spaces.engineering import SteelSection
+        from hsds.spaces.engineering import SteelSection
 
         var = SteelSection()
         for idx in var._indices:

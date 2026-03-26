@@ -40,7 +40,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import DesignSpace, Minimization, SteelSection
+from hsds import DesignSpace, Minimization, SteelSection
 
 # ---------------------------------------------------------------------------
 # Design parameters

@@ -1,7 +1,7 @@
 """
 examples/07_rc_section_full.py
 ===============================
-Reinforced concrete beam — full material + geometry + rebar optimisation.
+Reinforced concrete beam — full material + geometry + rebar optimization.
 
 All three engineering variable types are used together:
 
@@ -36,14 +36,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import (
+from hsds import (
     ACIRebar,
     ConcreteGrade,
     DesignSpace,
     Discrete,
     Minimization,
 )
-from harmonix.spaces.engineering import _AREAS_50, _COUNTS
+from hsds.spaces.engineering import _AREAS_50, _COUNTS
 
 # ---------------------------------------------------------------------------
 # Design parameters

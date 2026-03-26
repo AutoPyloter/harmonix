@@ -7,7 +7,7 @@ parameters of Minimization and MultiObjective.
 Covers:
 - EvaluationCache: hits, misses, eviction, clear, stats
 - RunLogger: CSV headers, row counts, content correctness
-- resume="new" / "auto" / "resume" behaviour
+- resume="new" / "auto" / "resume" behavior
 - log_init / log_history / log_evaluations / history_every
 - init checkpoint written immediately
 """
@@ -23,10 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.logging import EvaluationCache, RunLogger, _resolve_path
-from harmonix.optimizer import Minimization
-from harmonix.space import DesignSpace
-from harmonix.variables import Continuous
+from hsds.logging import EvaluationCache, RunLogger, _resolve_path
+from hsds.optimizer import Minimization
+from hsds.space import DesignSpace
+from hsds.variables import Continuous
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -323,7 +323,7 @@ class TestResume:
             Minimization(space, _sphere).optimize(
                 memory_size=5,
                 max_iter=10,
-                checkpoint_path="/tmp/_harmonix_nonexistent_test.json",
+                checkpoint_path="/tmp/_hsds_nonexistent_test.json",
                 resume="resume",
             )
 

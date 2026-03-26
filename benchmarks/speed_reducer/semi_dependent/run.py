@@ -20,7 +20,7 @@ from typing import Any, Dict, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from benchmarks.utils.plotter import ConvergencePlotter
-from harmonix import Continuous, DesignSpace, Minimization
+from hsds import Continuous, DesignSpace, Minimization
 
 
 def _b_lower(ctx: Dict[str, float]) -> float:

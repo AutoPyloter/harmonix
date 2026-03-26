@@ -1,10 +1,10 @@
 """
-harmonix.spaces.math
+hsds.spaces.math
 ============================
 Mathematical search spaces — variable types whose domains are defined
 by classical number-theoretic or algebraic structures.
 
-All classes follow the :class:`~harmonix.Variable` contract and
+All classes follow the :class:`~hsds.Variable` contract and
 are pre-registered in the plugin registry under the names shown in the
 table below.
 
@@ -32,8 +32,8 @@ Usage
 -----
 .. code-block:: python
 
-    from harmonix import DesignSpace
-    from harmonix.spaces.math import PrimeVariable, NaturalNumber
+    from hsds import DesignSpace
+    from hsds.spaces.math import PrimeVariable, NaturalNumber
 
     space = DesignSpace()
     space.add("n_bars", NaturalNumber(hi=40))
@@ -44,7 +44,7 @@ Or via the registry:
 
 .. code-block:: python
 
-    from harmonix import create_variable
+    from hsds import create_variable
     var = create_variable("prime", lo=2, hi=100)
 """
 

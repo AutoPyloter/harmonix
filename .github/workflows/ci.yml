@@ -18,7 +18,7 @@ jobs:
       - name: Install ruff
         run: pip install ruff
       - name: Check lint + isort
-        run: ruff check harmonix/ tests/
+        run: ruff check hsds/ tests/
 
   typecheck:
     name: Type check (mypy)
@@ -33,7 +33,7 @@ jobs:
           pip install mypy
           pip install -e .
       - name: Run mypy
-        run: mypy harmonix/ --ignore-missing-imports --no-strict-optional
+        run: mypy hsds/ --ignore-missing-imports --no-strict-optional
 
   test:
     name: Python ${{ matrix.python-version }}
@@ -59,7 +59,7 @@ jobs:
         run: |
           pytest tests/ -v --tb=short \
             --ignore=tests/test_hypothesis.py \
-            --cov=harmonix \
+            --cov=hsds \
             --cov-report=term-missing \
             --cov-report=xml
       - name: Run hypothesis tests

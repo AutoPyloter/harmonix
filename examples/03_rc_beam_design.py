@@ -33,8 +33,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import ACIRebar, DesignSpace, Discrete, Minimization
-from harmonix.spaces.engineering import _AREAS_50, _COUNTS
+from hsds import ACIRebar, DesignSpace, Discrete, Minimization
+from hsds.spaces.engineering import _AREAS_50, _COUNTS
 
 # ---------------------------------------------------------------------------
 # Problem parameters

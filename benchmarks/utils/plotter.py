@@ -1,7 +1,7 @@
 """
 plotter.py
 ==========
-Central convergence-history visualisation for the Harmonix benchmark suite.
+Central convergence-history visualisation for the hsds benchmark suite.
 
 The :class:`ConvergencePlotter` renders fitness and constraint-penalty
 curves on a shared *y*-axis using a **penalty–fitness alignment** trick:
@@ -102,7 +102,7 @@ class TextBox:
 # ---------------------------------------------------------------------------
 def read_history_csv(path: Union[str, Path]) -> List[HistoryRecord]:
     """
-    Read a harmonix history CSV into a list of :class:`HistoryRecord`.
+    Read a hsds history CSV into a list of :class:`HistoryRecord`.
 
     Expected columns: ``iteration``, ``best_fitness``, ``best_penalty``.
     Additional columns (e.g. variable values) are silently ignored.
@@ -152,7 +152,7 @@ class ConvergencePlotter:
     Parameters
     ----------
     history_file : str | Path
-        Path to a harmonix history CSV.
+        Path to a hsds history CSV.
     """
 
     def __init__(self, history_file: Union[str, Path]) -> None:
@@ -666,13 +666,13 @@ def plot_multi_run_convergence(
     Parameters
     ----------
     history_files : sequence of paths
-        Each path should point to a harmonix history CSV from an
+        Each path should point to a hsds history CSV from an
         independent run.  All runs must use the same ``history_every``
         setting so iteration grids align.
     label : str
         Legend label for this series.
     color : str
-        Line and fill colour.
+        Line and fill color.
     title : str
         Axes title (only applied when *ax* is ``None``).
     save_path : str | Path | None

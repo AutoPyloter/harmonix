@@ -1,16 +1,16 @@
 """
-harmonix.spaces
+hsds.spaces
 ======================
 Built-in domain-specific search spaces.
 
 All types are importable directly from this sub-package **or** from the
-top-level ``harmonix`` namespace.
+top-level ``hsds`` namespace.
 
 Mathematical spaces
 -------------------
 .. code-block:: python
 
-    from harmonix.spaces import (
+    from hsds.spaces import (
         NaturalNumber, WholeNumber,
         NegativeInt, NegativeReal, PositiveReal,
         PrimeVariable, PowerOfTwo, Fibonacci,
@@ -20,7 +20,7 @@ Engineering spaces
 ------------------
 .. code-block:: python
 
-    from harmonix.spaces import ACIRebar, ACIDoubleRebar
+    from hsds.spaces import ACIRebar, ACIDoubleRebar
 
 Registry names
 --------------
@@ -28,7 +28,7 @@ Every type is also accessible via the plugin registry:
 
 .. code-block:: python
 
-    from harmonix import create_variable
+    from hsds import create_variable
     var = create_variable("prime", hi=100)
     var = create_variable("aci_rebar", d_expr=0.55, cc_expr=40.0)
 """

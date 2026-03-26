@@ -10,7 +10,7 @@ import pandas as pd
 import seaborn as sns
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from harmonix import Minimization
+from hsds import Minimization
 
 BENCHMARKS = [
     {
@@ -190,7 +190,7 @@ def main():
             for i in range(1, N_RUNS + 1):
                 tasks.append((prob["id"], prob["title"], m_type, m_name, prob["path"], prob["max_iter"], i))
 
-    print(f"[STATISTICS] Booting 600 concurrent Harmonix Optimizations ({N_RUNS} runs x 6 problems x 2 variants)...")
+    print(f"[STATISTICS] Booting 600 concurrent hsds Optimizations ({N_RUNS} runs x 6 problems x 2 variants)...")
 
     results = []
     start_time = time.perf_counter()
@@ -225,7 +225,7 @@ def main():
     # Format STATISTICAL_REPORT.md
     report_content = [
         "# 50-Run Statistical Robustness Report",
-        "\nThis report conclusively demonstrates through massive 600-run simulation data that the Harmonix library's **Extreme Dependent Space** eradicates the combinatorial explosion typically faced in penalty-based operations, reducing standard continuous derivations to flat determinism.",
+        "\nThis report conclusively demonstrates through massive 600-run simulation data that the hsds library's **Extreme Dependent Space** eradicates the combinatorial explosion typically faced in penalty-based operations, reducing standard continuous derivations to flat determinism.",
         "\n## Visual Data Analysis",
         "![Statistical Robustness Distributions](benchmarks/statistical_robustness.png)",
         "\n## Exact Aggregate Table (Cost Statistics)\n",

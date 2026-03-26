@@ -33,8 +33,8 @@ from benchmarks.retaining_wall.common import (
     compute_cost,
     compute_geotech,
 )
-from harmonix import ACIRebar, Continuous, DesignSpace, Minimization
-from harmonix.spaces.engineering import _AREAS_50, _COUNTS
+from hsds import ACIRebar, Continuous, DesignSpace, Minimization
+from hsds.spaces.engineering import _AREAS_50, _COUNTS
 
 N_COUNTS = len(_COUNTS)
 
@@ -104,7 +104,7 @@ def build_space() -> DesignSpace:
     space.add("x5", Continuous(lo=300.0, hi=1000.0))
     space.add("x1", Continuous(lo=_x1_min, hi=_x1_max))  # Embedded Geotech
 
-    # Native Harmonix ACIRebar spaces strictly managing ductility & fit
+    # Native hsds ACIRebar spaces strictly managing ductility & fit
     space.add(
         "dc_stem",
         ACIRebar(

@@ -16,7 +16,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-from harmonix.optimizer import (
+from hsds.optimizer import (
     HarmonyMemory,
     HarmonySearchOptimizer,
     Maximization,
@@ -24,9 +24,9 @@ from harmonix.optimizer import (
     MultiObjective,
     OptimizationResult,
 )
-from harmonix.pareto import ParetoResult
-from harmonix.space import DesignSpace
-from harmonix.variables import Continuous, Discrete
+from hsds.pareto import ParetoResult
+from hsds.space import DesignSpace
+from hsds.variables import Continuous, Discrete
 
 # ---------------------------------------------------------------------------
 # HarmonyMemory
@@ -341,7 +341,7 @@ class TestMultiObjective:
         assert len(result.front) > 0
 
     def test_front_solutions_are_non_dominated(self):
-        from harmonix.pareto import dominates
+        from hsds.pareto import dominates
 
         space = self._zdt1_space()
         result = MultiObjective(space, self._zdt1_obj).optimize(memory_size=10, max_iter=300, archive_size=30)

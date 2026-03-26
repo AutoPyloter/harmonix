@@ -164,7 +164,7 @@ class EvaluationCache:
 
 class RunLogger:
     """
-    File-based logger for optimisation runs.
+    File-based logger for optimization runs.
 
     Manages up to three CSV log files:
 

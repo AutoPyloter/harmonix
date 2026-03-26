@@ -1,4 +1,4 @@
-# harmonix ruff configuration
+# hsds ruff configuration
 line-length = 120
 
 [lint]
@@ -19,8 +19,8 @@ exclude = [
 ]
 
 [lint.per-file-ignores]
-"harmonix/__init__.py" = ["F401"]
-"harmonix/spaces/__init__.py" = ["F401"]
+"hsds/__init__.py" = ["F401"]
+"hsds/spaces/__init__.py" = ["F401"]
 "tests/*" = ["E402", "F811"]
 
 [format]

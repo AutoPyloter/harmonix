@@ -1,6 +1,6 @@
 # 50-Run Statistical Robustness Report
 
-This report conclusively demonstrates through massive 600-run simulation data that the Harmonix library's **Extreme Dependent Space** eradicates the combinatorial explosion typically faced in penalty-based operations, reducing standard continuous derivations to flat determinism.
+This report conclusively demonstrates through massive 600-run simulation data that the HSDS library's **Extreme Dependent Space** eradicates the combinatorial explosion typically faced in penalty-based operations, reducing standard continuous derivations to flat determinism.
 
 ## Visual Data Analysis
 ![Statistical Robustness Distributions](benchmarks/statistical_robustness.png)

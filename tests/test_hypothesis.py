@@ -29,10 +29,10 @@ hypothesis = pytest.importorskip("hypothesis")
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from harmonix.logging import EvaluationCache
-from harmonix.optimizer import HarmonyMemory, Minimization
-from harmonix.space import DesignSpace
-from harmonix.variables import Categorical, Continuous, Discrete, Integer
+from hsds.logging import EvaluationCache
+from hsds.optimizer import HarmonyMemory, Minimization
+from hsds.space import DesignSpace
+from hsds.variables import Categorical, Continuous, Discrete, Integer
 
 # ---------------------------------------------------------------------------
 # Strategies

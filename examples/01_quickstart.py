@@ -1,9 +1,9 @@
 """
 examples/01_quickstart.py
 =========================
-Quickstart: minimise a simple 2D function with a linear constraint.
+Quickstart: minimize a simple 2D function with a linear constraint.
 
-    minimise    f(x, y) = (x - 3)^2 + (y - 2)^2
+    minimize    f(x, y) = (x - 3)^2 + (y - 2)^2
     subject to  x + y <= 4
 
 True optimum: x = 2, y = 2  →  f = 1  (on the constraint boundary)
@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import Continuous, DesignSpace, Minimization
+from hsds import Continuous, DesignSpace, Minimization
 
 # --- 1. Define the search space -------------------------------------------
 

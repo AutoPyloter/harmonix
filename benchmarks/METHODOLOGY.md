@@ -1,7 +1,7 @@
-# Harmonix Benchmark Methodology
+# HSDS Benchmark Methodology
 
 ## Abstract
-This document outlines the academic foundation of the **Harmonix Benchmark Suite**. It demonstrates the superiority of the "Extreme Dependent Space" approach over traditional penalty-based optimization methods. By analytically embedding physical constraints directly into the search space rather than evaluating them within the objective function, Harmonix completely eliminates or drastically reduces the need for penalty functions. This approach ensures that the optimizer strictly explores physically feasible designs, resulting in faster and deeper convergence toward the global optimum.
+This document outlines the academic foundation of the **HSDS Benchmark Suite**. It demonstrates the superiority of the "Extreme Dependent Space" approach over traditional penalty-based optimization methods. By analytically embedding physical constraints directly into the search space rather than evaluating them within the objective function, HSDS completely eliminates or drastically reduces the need for penalty functions. This approach ensures that the optimizer strictly explores physically feasible designs, resulting in faster and deeper convergence toward the global optimum.
 
 ## Mathematical Transformation: Penalty vs. Dependent Space
 

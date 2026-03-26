@@ -54,7 +54,7 @@ MAX_ITER_CAP: int = 200_000
 @dataclass
 class OptimizationResult:
     """
-    Result of a single-objective optimisation run.
+    Result of a single-objective optimization run.
 
     Attributes
     ----------
@@ -571,7 +571,7 @@ class HarmonySearchOptimizer(ABC):
 
 class Minimization(HarmonySearchOptimizer):
     """
-    Single-objective Harmony Search minimiser.
+    Single-objective Harmony Search minimizer.
 
     Parameters
     ----------
@@ -749,7 +749,7 @@ class MultiObjective(HarmonySearchOptimizer):
     objective : callable
         ``objective(harmony) -> (objectives: tuple[float, ...], penalty: float)``
 
-        All objectives are minimised.  Negate maximised objectives inside
+        All objectives are minimized.  Negate maximized objectives inside
         the callable.
 
     Examples

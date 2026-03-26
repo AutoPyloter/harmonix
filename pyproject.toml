@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "harmonix-opt"
+name = "hsds"
 version = "1.0.2"
-description = "Harmony Search optimisation with dependent variable spaces and engineering domain catalogues"
+description = "Harmony Search Algorithm for Dependent Design Spaces"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Abdulkadir Özcan", email = "a.kdr.ozcn@gmail.com" }]
@@ -13,8 +13,8 @@ requires-python = ">=3.8"
 keywords = [
     "harmony search",
     "metaheuristic",
-    "optimisation",
     "optimization",
+    "dependent design spaces",
     "structural engineering",
     "multi-objective",
     "pareto",
@@ -39,18 +39,18 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/AutoPyloter/harmonix"
-"Source" = "https://github.com/AutoPyloter/harmonix"
-"Bug Tracker" = "https://github.com/AutoPyloter/harmonix/issues"
-"Documentation" = "https://github.com/AutoPyloter/harmonix/wiki"
-"Changelog" = "https://github.com/AutoPyloter/harmonix/releases"
+"Homepage" = "https://github.com/AutoPyloter/hsds"
+"Source" = "https://github.com/AutoPyloter/hsds"
+"Bug Tracker" = "https://github.com/AutoPyloter/hsds/issues"
+"Documentation" = "https://github.com/AutoPyloter/hsds/wiki"
+"Changelog" = "https://github.com/AutoPyloter/hsds/releases"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["harmonix*"]
+include = ["hsds*"]
 
 [tool.setuptools.package-data]
-harmonix = ["py.typed"]
+hsds = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

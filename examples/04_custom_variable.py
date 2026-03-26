@@ -7,7 +7,7 @@ Demonstrates both ways to define a custom variable:
 2. make_variable      — factory function, best for quick prototyping
 
 Problem: find the pair (p, q) of twin primes closest to 100
-         that minimises |p - 100| + |q - 100|.
+         that minimizes |p - 100| + |q - 100|.
 
 Twin primes are pairs (p, p+2) where both are prime, e.g. (11,13), (17,19).
 
@@ -22,7 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import (
+from hsds import (
     DesignSpace,
     Minimization,
     Variable,
@@ -137,7 +137,7 @@ print(f"Distance to 100:      {result1.best_fitness:.0f}")
 
 
 # ---------------------------------------------------------------------------
-# Problem 2: minimise |f - 100| where f is a Fibonacci number
+# Problem 2: minimize |f - 100| where f is a Fibonacci number
 # ---------------------------------------------------------------------------
 
 print()

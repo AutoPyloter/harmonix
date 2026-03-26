@@ -71,7 +71,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from utils.plotter import ConvergencePlotter
 
-from harmonix import Continuous, DesignSpace, Minimization
+from hsds import Continuous, DesignSpace, Minimization
 
 # ---------------------------------------------------------------------------
 # Physical Constants  (all thresholds derived from these, never hard-coded)

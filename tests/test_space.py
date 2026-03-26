@@ -1,7 +1,7 @@
 """
 tests/test_space.py
 ===================
-Unit tests for harmonix.space — DesignSpace.
+Unit tests for hsds.space — DesignSpace.
 """
 
 import sys
@@ -13,8 +13,8 @@ from typing import Any, cast
 
 import pytest
 
-from harmonix.space import DesignSpace
-from harmonix.variables import Categorical, Continuous, Integer
+from hsds.space import DesignSpace
+from hsds.variables import Categorical, Continuous, Integer
 
 
 class TestDesignSpaceConstruction:

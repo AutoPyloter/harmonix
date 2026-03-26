@@ -10,7 +10,7 @@ Three ways to define a custom variable
 
 .. code-block:: python
 
-    from harmonix import Variable, register_variable
+    from hsds import Variable, register_variable
 
     @register_variable("rebar_aci")
     class ACIRebarVariable(Variable):
@@ -22,7 +22,7 @@ Three ways to define a custom variable
 
 .. code-block:: python
 
-    from harmonix import make_variable
+    from hsds import make_variable
 
     PrimeVar = make_variable(
         name="prime",
@@ -36,7 +36,7 @@ Three ways to define a custom variable
 
 .. code-block:: python
 
-    from harmonix import create_variable
+    from hsds import create_variable
 
     var = create_variable("rebar_aci", d_expr=0.55, cc_expr=40.0)
 
@@ -44,7 +44,7 @@ Design notes
 ------------
 * Names are case-insensitive, normalised to lower-case.
 * Built-in types (continuous, discrete, integer, categorical) and all
-  types from ``harmonix.spaces`` are pre-registered at import time.
+  types from ``hsds.spaces`` are pre-registered at import time.
 * Re-registering an existing name raises ``VariableAlreadyRegisteredError``
   unless ``overwrite=True``.
 """

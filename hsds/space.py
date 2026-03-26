@@ -26,7 +26,7 @@ class DesignSpace:
 
     Examples
     --------
-    >>> from harmonix import DesignSpace, Continuous, Discrete
+    >>> from hsds import DesignSpace, Continuous, Discrete
     >>> space = DesignSpace()
     >>> space.add("h",  Continuous(0.3, 1.2))
     >>> space.add("bf", Continuous(lo=lambda ctx: ctx["h"], hi=0.6))

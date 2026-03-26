@@ -1,7 +1,7 @@
 """
 examples/05_multi_objective.py
 ==============================
-Multi-objective optimisation on the ZDT1 benchmark problem.
+Multi-objective optimization on the ZDT1 benchmark problem.
 
 ZDT1 (Zitzler–Deb–Thiele #1)
 ------------------------------
@@ -35,7 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import Continuous, DesignSpace, MultiObjective
+from hsds import Continuous, DesignSpace, MultiObjective
 
 # ---------------------------------------------------------------------------
 # Search space

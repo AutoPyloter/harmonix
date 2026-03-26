@@ -1,12 +1,12 @@
 """
-PyHarmonySearch
-===============
+HSDS: Harmony Search in Dependent Space
+========================================
 A clean, extensible Python implementation of the Harmony Search (HS)
-metaheuristic optimisation algorithm.
+metaheuristic optimization algorithm.
 
 Quickstart
 ----------
->>> from harmonix import DesignSpace, Continuous, Minimization
+>>> from hsds import DesignSpace, Continuous, Minimization
 >>>
 >>> space = DesignSpace()
 >>> space.add("x", Continuous(0.0, 5.0))
@@ -30,10 +30,10 @@ Three patterns are supported:
 
 Built-in domain spaces
 ----------------------
-Mathematical and engineering spaces live in :mod:`harmonix.spaces`
+Mathematical and engineering spaces live in :mod:`hsds.spaces`
 and are also re-exported here for convenience:
 
->>> from harmonix import PrimeVariable, ACIRebar
+>>> from hsds import PrimeVariable, ACIRebar
 """
 
 # --- primitives ---

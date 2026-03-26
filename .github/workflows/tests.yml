@@ -26,7 +26,7 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        pytest tests/ --cov=harmonix --cov-report=xml
+        pytest tests/ --cov=hsds --cov-report=xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5.5.3

@@ -1,7 +1,7 @@
 """
 tests/test_bandwidth.py
 =======================
-Tests for dynamic bandwidth narrowing and pitch adjustment behaviour.
+Tests for dynamic bandwidth narrowing and pitch adjustment behavior.
 
 Covers:
 - _compute_bw boundary conditions and decay shape
@@ -20,9 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.optimizer import Minimization
-from harmonix.space import DesignSpace
-from harmonix.variables import Categorical, Continuous, Discrete, Integer
+from hsds.optimizer import Minimization
+from hsds.space import DesignSpace
+from hsds.variables import Categorical, Continuous, Discrete, Integer
 
 # ---------------------------------------------------------------------------
 # _compute_bw
@@ -103,7 +103,7 @@ class TestBwInjection:
         space.add("x", SpyVar(0.0, 1.0))
 
         opt = Minimization(space, lambda h: (h["x"] ** 2, 0.0))
-        opt._memory = __import__("harmonix.optimizer", fromlist=["HarmonyMemory"]).HarmonyMemory(size=5, mode="min")
+        opt._memory = __import__("hsds.optimizer", fromlist=["HarmonyMemory"]).HarmonyMemory(size=5, mode="min")
         for _ in range(5):
             h = space.sample_harmony()
             opt._memory.add(h, h["x"] ** 2, 0.0)

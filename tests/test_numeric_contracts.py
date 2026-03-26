@@ -11,9 +11,9 @@ import math
 
 import pytest
 
-from harmonix.optimizer import Minimization, MultiObjective
-from harmonix.space import DesignSpace
-from harmonix.variables import Continuous
+from hsds.optimizer import Minimization, MultiObjective
+from hsds.space import DesignSpace
+from hsds.variables import Continuous
 
 
 def _space() -> DesignSpace:

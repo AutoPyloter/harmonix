@@ -34,7 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harmonix import Continuous, DesignSpace, Minimization
+from hsds import Continuous, DesignSpace, Minimization
 
 # ---------------------------------------------------------------------------
 # Constants

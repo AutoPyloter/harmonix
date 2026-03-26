@@ -1,7 +1,7 @@
 """
 tests/test_spaces.py
 ====================
-Tests for harmonix.spaces — math and engineering domain spaces.
+Tests for hsds.spaces — math and engineering domain spaces.
 """
 
 import json
@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.spaces.engineering import (
+from hsds.spaces.engineering import (
     ACIDoubleRebar,
     ACIRebar,
     ConcreteGrade,
@@ -24,7 +24,7 @@ from harmonix.spaces.engineering import (
     _aci_limits,
     _load_catalogue_from_file,
 )
-from harmonix.spaces.math import (
+from hsds.spaces.math import (
     Fibonacci,
     NaturalNumber,
     NegativeInt,
@@ -39,7 +39,7 @@ from harmonix.spaces.math import (
 )
 
 # ---------------------------------------------------------------------------
-# Math spaces — shared behaviour
+# Math spaces — shared behavior
 # ---------------------------------------------------------------------------
 
 
@@ -628,24 +628,24 @@ class TestSeismicZoneTBDY:
 
 class TestParetoDominance:
     def test_dominates_basic(self):
-        from harmonix.pareto import dominates
+        from hsds.pareto import dominates
 
         assert dominates((1.0, 2.0), (2.0, 3.0))
         assert not dominates((2.0, 3.0), (1.0, 2.0))
 
     def test_dominates_equal_not_dominate(self):
-        from harmonix.pareto import dominates
+        from hsds.pareto import dominates
 
         assert not dominates((1.0, 2.0), (1.0, 2.0))
 
     def test_dominates_partial_better(self):
-        from harmonix.pareto import dominates
+        from hsds.pareto import dominates
 
         assert dominates((1.0, 2.0), (1.0, 3.0))
         assert not dominates((1.0, 3.0), (1.0, 2.0))
 
     def test_different_lengths_raises(self):
-        from harmonix.pareto import dominates
+        from hsds.pareto import dominates
 
         with pytest.raises(ValueError):
             dominates((1.0,), (1.0, 2.0))

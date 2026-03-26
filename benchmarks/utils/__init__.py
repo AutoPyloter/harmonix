@@ -1,1 +1,1 @@
-# benchmarks.utils — shared utilities for the Harmonix benchmark suite.
+# benchmarks.utils — shared utilities for the hsds benchmark suite.

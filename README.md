@@ -1,41 +1,41 @@
-# harmonix
+# HSDS: Harmony Search in Dependent Space
 
 <p align="left">
-  <a href="https://pypi.org/project/harmonix-opt/"><img src="https://img.shields.io/pypi/v/harmonix-opt?style=flat-square&color=blue" alt="PyPI Version"></a>
+  <a href="https://pypi.org/project/hsds/"><img src="https://img.shields.io/pypi/v/hsds?style=flat-square&color=blue" alt="PyPI Version"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=flat-square" alt="Python Versions"></a>
-  <a href="https://pypi.org/project/harmonix-opt/"><img src="https://img.shields.io/pypi/wheel/harmonix-opt?style=flat-square&color=blue" alt="PyPI Wheel"></a>
+  <a href="https://pypi.org/project/hsds/"><img src="https://img.shields.io/pypi/wheel/hsds?style=flat-square&color=blue" alt="PyPI Wheel"></a>
   <br>
 
-  <a href="https://github.com/AutoPyloter/harmonix/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AutoPyloter/harmonix/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
+  <a href="https://github.com/AutoPyloter/hsds/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AutoPyloter/hsds/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
 <a href="#testing"><img src="https://img.shields.io/badge/tests-472%20passed-brightgreen?style=flat-square" alt="Tests"></a>
-  <a href="https://codecov.io/github/AutoPyloter/harmonix"><img src="https://codecov.io/github/AutoPyloter/harmonix/graph/badge.svg?token=H93FEVMFLS&style=flat-square" alt="Codecov"></a>
+  <a href="https://codecov.io/github/AutoPyloter/hsds"><img src="https://codecov.io/github/AutoPyloter/hsds/graph/badge.svg?token=H93FEVMFLS&style=flat-square" alt="Codecov"></a>
   <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square" alt="Ruff"></a>
   <a href="https://mypy-lang.org/"><img src="https://www.mypy-lang.org/static/mypy_badge.svg?style=flat-square" alt="Checked with mypy"></a>
   <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=flat-square" alt="pre-commit"></a>
-  <a href="https://github.com/AutoPyloter/harmonix/network/updates"><img src="https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot&style=flat-square" alt="Dependabot"></a>
+  <a href="https://github.com/AutoPyloter/hsds/network/updates"><img src="https://img.shields.io/badge/Dependabot-enabled-blue?logo=dependabot&style=flat-square" alt="Dependabot"></a>
   <a href="https://peps.python.org/pep-0561/"><img src="https://img.shields.io/badge/types-PEP_561-blue.svg?style=flat-square" alt="PEP 561"></a>
-  <a href="https://libraries.io/pypi/harmonix-opt"><img src="https://img.shields.io/librariesio/release/pypi/harmonix-opt?style=flat-square" alt="Dependencies"></a>
-  [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AutoPyloter_harmonix&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AutoPyloter_harmonix)
+  <a href="https://libraries.io/pypi/hsds"><img src="https://img.shields.io/librariesio/release/pypi/hsds?style=flat-square" alt="Dependencies"></a>
+  [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=AutoPyloter_hsds&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AutoPyloter_hsds)
   <br>
 
-  <a href="https://pepy.tech/project/harmonix-opt"><img src="https://static.pepy.tech/badge/harmonix-opt/month?style=flat-square" alt="Downloads/Month"></a>
-  <a href="https://github.com/AutoPyloter/harmonix/stargazers"><img src="https://img.shields.io/github/stars/AutoPyloter/harmonix?style=social" alt="GitHub Repo stars"></a>
-  <a href="https://github.com/AutoPyloter/harmonix/commits/main"><img src="https://img.shields.io/github/last-commit/AutoPyloter/harmonix?style=flat-square" alt="Last Commit"></a>
+  <a href="https://pepy.tech/project/hsds"><img src="https://static.pepy.tech/badge/hsds/month?style=flat-square" alt="Downloads/Month"></a>
+  <a href="https://github.com/AutoPyloter/hsds/stargazers"><img src="https://img.shields.io/github/stars/AutoPyloter/hsds?style=social" alt="GitHub Repo stars"></a>
+  <a href="https://github.com/AutoPyloter/hsds/commits/main"><img src="https://img.shields.io/github/last-commit/AutoPyloter/hsds?style=flat-square" alt="Last Commit"></a>
   <a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
   <a href="https://www.repostatus.org/#active"><img src="https://img.shields.io/badge/Project_Status-Active-brightgreen?style=flat-square" alt="Project Status: Active"></a>
-  [![GitHub repo size](https://img.shields.io/github/repo-size/AutoPyloter/harmonix)]()
+  [![GitHub repo size](https://img.shields.io/github/repo-size/AutoPyloter/hsds)]()
   <br>
 
   <a href="https://doi.org/10.5281/zenodo.19160019"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.19160019.svg?style=flat-square" alt="DOI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License: MIT"></a>
 </p>
 
-**Harmony Search optimisation with dependent variable spaces and engineering domain catalogues.**
+**Harmony Search Algorithm for Dependent Design Spaces.**
 
-harmonix is a Python library for solving single- and multi-objective optimisation problems using the [Harmony Search](https://en.wikipedia.org/wiki/Harmony_search) metaheuristic. Its key design principle is *search-space first*: instead of just minimising a function, you describe the domain of each variable precisely — including dependencies between variables, discrete grids, catalogue lookups, and domain-specific feasibility rules — and let the algorithm handle the rest.
+HSDS is a Python library for solving single- and multi-objective optimization problems using the [Harmony Search](https://en.wikipedia.org/wiki/Harmony_search) metaheuristic. Its key design principle is *search-space first*: instead of just minimizing a function, you describe the domain of each variable precisely — including dependencies between variables, discrete grids, catalog lookups, and domain-specific feasibility rules — and let the algorithm handle the rest.
 
 ```python
-from harmonix import DesignSpace, Continuous, Discrete, Minimization
+from hsds import DesignSpace, Continuous, Discrete, Minimization
 
 space = DesignSpace()
 space.add("h",  Continuous(0.30, 1.20))
@@ -60,7 +60,7 @@ print(result)
 ## Installation
 
 ```bash
-pip install harmonix-opt
+pip install hsds
 ```
 
 Requires Python 3.8+. No mandatory dependencies beyond the standard library.
@@ -107,10 +107,10 @@ space.add("tw", Continuous(lo=lambda ctx: ctx["d"] / 50,
 
 ### Domain-specific variable spaces
 
-harmonix ships a catalogue of ready-made variable types for common engineering and mathematical domains:
+HSDS ships a catalog of ready-made variable types for common engineering and mathematical domains:
 
 ```python
-from harmonix import ACIRebar, SteelSection, ConcreteGrade, PrimeVariable
+from hsds import ACIRebar, SteelSection, ConcreteGrade, PrimeVariable
 
 # ACI 318 ductile bar arrangement — bounds depend on d and fc
 space.add("rebar", ACIRebar(d_expr=lambda ctx: ctx["d"],
@@ -118,7 +118,7 @@ space.add("rebar", ACIRebar(d_expr=lambda ctx: ctx["d"],
                             fc=lambda ctx: ctx["grade"].fck_MPa,
                             fy=420.0))
 
-# Standard steel I-section from built-in catalogue (IPE, HEA, HEB, W)
+# Standard steel I-section from built-in catalog (IPE, HEA, HEB, W)
 space.add("section", SteelSection(series=["IPE", "HEA"]))
 
 # EN 206 concrete grade (C12/15 to C90/105)
@@ -128,7 +128,7 @@ space.add("concrete", ConcreteGrade(min_grade="C25/30", max_grade="C50/60"))
 space.add("p", PrimeVariable(lo=2, hi=500))
 ```
 
-Full catalogue:
+Full catalog:
 
 | Category | Types |
 |----------|-------|
@@ -140,7 +140,7 @@ Full catalogue:
 All types are also accessible via the plugin registry:
 
 ```python
-from harmonix import create_variable, list_variable_types
+from hsds import create_variable, list_variable_types
 print(list_variable_types())
 var = create_variable("aci_rebar", d_expr=0.55, cc_expr=40.0)
 ```
@@ -150,7 +150,7 @@ var = create_variable("aci_rebar", d_expr=0.55, cc_expr=40.0)
 **Subclass** `Variable` for full control:
 
 ```python
-from harmonix import Variable, register_variable
+from hsds import Variable, register_variable
 
 @register_variable("my_type")
 class MyVariable(Variable):
@@ -162,7 +162,7 @@ class MyVariable(Variable):
 **Factory function** for quick prototyping:
 
 ```python
-from harmonix import make_variable
+from hsds import make_variable
 import random
 
 EvenVar = make_variable(
@@ -254,7 +254,7 @@ result = Minimization(space, objective).optimize(
 )
 ```
 
-Set `bw_max == bw_min` for constant bandwidth (original HS behaviour). Discrete and categorical variables are unaffected by bandwidth.
+Set `bw_max == bw_min` for constant bandwidth (original HS behavior). Discrete and categorical variables are unaffected by bandwidth.
 
 ### Resume control
 
@@ -317,12 +317,12 @@ grade = grade_var.decode(result.best_harmony["concrete"])
 print(grade.name, grade.fck_MPa, "MPa", grade.Ecm_GPa, "GPa")
 ```
 
-### Steel section catalogue
+### Steel section catalog
 
-The built-in catalogue covers IPE 80–600, HEA 100–500, HEB 100–500, and W-sections. Override with your own file:
+The built-in catalog covers IPE 80–600, HEA 100–500, HEB 100–500, and W-sections. Override with your own file:
 
 ```python
-var = SteelSection(catalogue="my_sections.json")  # custom catalogue
+var = SteelSection(catalog="my_sections.json")  # custom catalog
 var = SteelSection(series=["HEA", "HEB"])          # filter series
 ```
 
@@ -330,13 +330,13 @@ var = SteelSection(series=["HEA", "HEB"])          # filter series
 
 ## Algorithm background
 
-harmonix implements Harmony Search with several enhancements:
+HSDS implements Harmony Search with several enhancements:
 
 **Dynamic bandwidth narrowing** — pitch adjustment step size decays exponentially. Early iterations explore broadly; late iterations converge precisely.
 
 **Intelligent pitch adjustment** — `neighbor()` is called with the current dependency context so the perturbed value stays feasible. The common incorrect approach of calling `sample()` on PAR is avoided.
 
-**Dependent search spaces** — variables are sampled in definition order; each receives a context dict of previously assigned values. Dependent bounds, catalogue filters, and feasibility checks can reference earlier variables without any special handling in the optimiser loop.
+**Dependent search spaces** — variables are sampled in definition order; each receives a context dict of previously assigned values. Dependent bounds, catalog filters, and feasibility checks can reference earlier variables without any special handling in the optimizer loop.
 
 **Deb constraint handling** — feasible solutions always rank above infeasible ones; among infeasible solutions ranking is by total penalty.
 
@@ -372,8 +372,8 @@ pytest tests/ -v
 ## Project structure
 
 ```
-harmonix/
-├── harmonix/
+hsds/
+├── hsds/
 │   ├── variables.py       # Continuous, Discrete, Integer, Categorical
 │   ├── space.py           # DesignSpace
 │   ├── optimizer.py       # Minimization, Maximization, MultiObjective
@@ -402,16 +402,16 @@ harmonix/
 
 ## Citation
 
-If you use `harmonix-opt` in your research, please cite it as follows:
+If you use `hsds` in your research, please cite it as follows:
 
 **APA:**
-> Özcan, A. (2026). harmonix-opt: Harmony Search optimisation with dependent variable spaces (Version 1.0.2) [Computer software]. https://doi.org/10.5281/zenodo.19160019
+> Özcan, A. (2026). hsds: Harmony Search Algorithm for Dependent Design Spaces (Version 1.0.2) [Computer software]. https://doi.org/10.5281/zenodo.19160019
 
 **BibTeX:**
 ```bibtex
-@software{ozcan_harmonix_2026,
+@software{ozcan_hsds_2026,
   author       = {Özcan, Abdulkadir},
-  title        = {harmonix-opt: Harmony Search optimisation with dependent variable spaces},
+  title        = {hsds: Harmony Search Algorithm for Dependent Design Spaces},
   month        = mar,
   year         = 2026,
   publisher    = {Zenodo},

@@ -29,7 +29,7 @@ from benchmarks.retaining_wall.common import (
     compute_geotech,
     get_beta1,
 )
-from harmonix import Continuous, DesignSpace, Minimization
+from hsds import Continuous, DesignSpace, Minimization
 
 # Constants
 DIAMS = [12, 14, 16, 20, 25, 28, 32]

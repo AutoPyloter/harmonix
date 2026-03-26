@@ -14,8 +14,8 @@ Focus areas:
 import csv
 import math
 
-from harmonix.logging import EvaluationCache, RunLogger
-from harmonix.pareto import ParetoArchive, non_dominated_front
+from hsds.logging import EvaluationCache, RunLogger
+from hsds.pareto import ParetoArchive, non_dominated_front
 
 
 class TestEvaluationCacheContracts:

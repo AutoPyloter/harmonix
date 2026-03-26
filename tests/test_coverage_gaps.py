@@ -12,23 +12,23 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Ensure harmonix is in path
+# Ensure hsds is in path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from harmonix.optimizer import (
+from hsds.optimizer import (
     HarmonyMemory,
     Minimization,
     MultiObjective,
 )
-from harmonix.space import DesignSpace
-from harmonix.spaces.engineering import (
+from hsds.space import DesignSpace
+from hsds.spaces.engineering import (
     SoilSPT,
     _DynamicGridVariable,
 )
-from harmonix.variables import Continuous
+from hsds.variables import Continuous
 
 # ---------------------------------------------------------------------------
-# harmonix/optimizer.py
+# hsds/optimizer.py
 # ---------------------------------------------------------------------------
 
 
@@ -38,7 +38,7 @@ class TestOptimizerGaps:
         space = DesignSpace()
         space.add("x", Continuous(0.0, 1.0))
         # Initialise base class directly to bypass auto-memory init if possible
-        from harmonix.optimizer import HarmonySearchOptimizer
+        from hsds.optimizer import HarmonySearchOptimizer
 
         class MockOptimizer(HarmonySearchOptimizer):
             def optimize(self, **kwargs):
@@ -129,7 +129,7 @@ class TestOptimizerGaps:
         # __str__ must raise to trigger the catch block
         mock_p.__str__ = MagicMock(side_effect=RuntimeError("catch me"))
 
-        with patch("harmonix.optimizer.Path") as mock_path_cls:
+        with patch("hsds.optimizer.Path") as mock_path_cls:
             mock_path_cls.side_effect = lambda x: mock_p if x == "evil_trigger" else Path(x)
             mock_path_cls.cwd = Path.cwd
             # Now call save_checkpoint
@@ -172,14 +172,14 @@ class TestOptimizerGaps:
 
 
 # ---------------------------------------------------------------------------
-# harmonix/spaces/engineering.py
+# hsds/spaces/engineering.py
 # ---------------------------------------------------------------------------
 
 
 class TestEngineeringGaps:
     def test_catalogue_variable_base_coverage(self):
         """Covers engineering.py:93 (self._indices = list(range(n)))."""
-        from harmonix.spaces.engineering import CatalogueVariable
+        from hsds.spaces.engineering import CatalogueVariable
 
         class DummyCatalogue(CatalogueVariable):
             def describe(self, code):
@@ -202,7 +202,7 @@ class TestEngineeringGaps:
     def test_dynamic_grid_neighbor_edge_cases(self):
         """Covers engineering.py:139 (continue in neighbor loop)."""
         # ACIRebar is a subclass of _DynamicGridVariable
-        from harmonix.spaces.engineering import ACIRebar
+        from hsds.spaces.engineering import ACIRebar
 
         var = ACIRebar(d_expr=0.5, cc_expr=40.0)
 

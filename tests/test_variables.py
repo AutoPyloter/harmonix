@@ -1,7 +1,7 @@
 """
 tests/test_variables.py
 =======================
-Unit tests for harmonix.variables — Continuous, Discrete, Integer, Categorical.
+Unit tests for hsds.variables — Continuous, Discrete, Integer, Categorical.
 
 Covers:
 - Continuous: sample, filter, neighbor, dependent bounds, lo>hi validation
@@ -9,7 +9,7 @@ Covers:
 - Integer: sample, filter, neighbor, roundtrip via Discrete
 - Categorical: sample, filter, neighbor, empty raises
 - _frange helper: endpoint guarantee, floating-point safety
-- _in_grid helper: tolerance behaviour
+- _in_grid helper: tolerance behavior
 - Variable ABC: cannot be instantiated directly
 """
 
@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest
 
-from harmonix.variables import (
+from hsds.variables import (
     Categorical,
     Continuous,
     Discrete,

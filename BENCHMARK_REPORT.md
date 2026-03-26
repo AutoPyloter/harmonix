@@ -1,9 +1,9 @@
-# The Harmonix Benchmark Suite — Final Report
+# The HSDS Benchmark Suite — Final Report
 
 ## Executive Summary
-This document serves as the final, cumulative dashboard for the **Harmonix Benchmark Suite**. Across six classically rigorous engineering optimization problems, the Harmonix library's **"Extreme Dependent Space"** (Zero-Penalty) architecture has systematically dismantled the traditional limitations of metaheuristic sampling.
+This document serves as the final, cumulative dashboard for the **HSDS Benchmark Suite**. Across six classically rigorous engineering optimization problems, the HSDS library's **"Extreme Dependent Space"** (Zero-Penalty) architecture has systematically dismantled the traditional limitations of metaheuristic sampling.
 
-By natively embedding physical equations (like buckling constraints, geotechnical stability matrices, triangular linkage assembly laws, and stress invariants) directly into the search boundaries utilizing hierarchical `lambda` evaluators, Harmonix mathematically prevents the generation of physically impossible states.
+By natively embedding physical equations (like buckling constraints, geotechnical stability matrices, triangular linkage assembly laws, and stress invariants) directly into the search boundaries utilizing hierarchical `lambda` evaluators, HSDS mathematically prevents the generation of physically impossible states.
 
 ## Benchmark Performance Matrix
 
@@ -20,9 +20,9 @@ By natively embedding physical equations (like buckling constraints, geotechnica
 
 *Note: Retaining Wall uses 15,000 iterations; all other problems use 30,000 iterations.*
 
-## The Harmonix Advantage
-1. **Zero Infeasible Operations Strategy:** Without Harmonix, standard penalty-based arrays are forced to randomly sample the blind multi-dimensional hypercube. E.g., in the Robot Gripper problem, traditional uniform generation produces a broken (unassemblable) linkage matrix almost 50% of the time. The Dependent Space structurally eliminates this waste. Every $O(n)$ cycle processes physically valid engineering geometry.
-2. **Infinite Gradient Escapes:** By eliminating artificial penalty plateaus (like the steep cliff face of the spherical volume limit in Pressure Vessel), Harmonix transforms non-differentiable penalty cliffs into smooth, natively bounded search parameters, inherently solving the premature convergence problem facing traditional algorithms like raw Harmony Search or NSGA-II.
+## The HSDS Advantage
+1. **Zero Infeasible Operations Strategy:** Without HSDS, standard penalty-based arrays are forced to randomly sample the blind multi-dimensional hypercube. E.g., in the Robot Gripper problem, traditional uniform generation produces a broken (unassemblable) linkage matrix almost 50% of the time. The Dependent Space structurally eliminates this waste. Every $O(n)$ cycle processes physically valid engineering geometry.
+2. **Infinite Gradient Escapes:** By eliminating artificial penalty plateaus (like the steep cliff face of the spherical volume limit in Pressure Vessel), HSDS transforms non-differentiable penalty cliffs into smooth, natively bounded search parameters, inherently solving the premature convergence problem facing traditional algorithms like raw Harmony Search or NSGA-II.
 3. **Parametric Fluidity:** By resolving circular constraint networks via hierarchical chaining (e.g. $m \rightarrow l_1 \rightarrow z \rightarrow d_1 \rightarrow d_2 \rightarrow b$ in Speed Reducer), the entire penalty array shrinks strictly to $0.0$, letting the objective function focus solely on pure cost mapping.
 
 ## Visual Showcase
@@ -46,4 +46,4 @@ By natively embedding physical equations (like buckling constraints, geotechnica
 ![Retaining Wall](benchmarks/retaining_wall_comparison.png)
 
 ## Conclusion
-The Harmonix library proves that algorithmic power is maximized not by abstracting the domain with post-generation penalties, but by structurally fusing the mathematical limits of the physical universe directly into the array's generation topology.
+The HSDS library proves that algorithmic power is maximized not by abstracting the domain with post-generation penalties, but by structurally fusing the mathematical limits of the physical universe directly into the array's generation topology.
