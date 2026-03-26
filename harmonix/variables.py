@@ -124,7 +124,7 @@ class Continuous(Variable):
 
     def sample(self, ctx: Context) -> float:
         lo, hi = self._bounds(ctx)
-        return random.uniform(lo, hi)
+        return random.uniform(lo, hi)  # NOSONAR
 
     def filter(self, candidates: List[float], ctx: Context) -> List[float]:
         lo, hi = self._bounds(ctx)
@@ -151,7 +151,7 @@ class Continuous(Variable):
         if width <= 0:
             return value
         bw = float(ctx.get("__bw__", 0.05))
-        new_val = value + random.gauss(0.0, bw * width)
+        new_val = value + random.gauss(0.0, bw * width)  # NOSONAR
         return max(lo, min(hi, new_val))
 
 
@@ -195,7 +195,7 @@ class Discrete(Variable):
 
     def sample(self, ctx: Context) -> Optional[float]:
         grid = self._grid(ctx)
-        return random.choice(grid) if grid else None
+        return random.choice(grid) if grid else None  # NOSONAR
 
     def filter(self, candidates: List[float], ctx: Context) -> List[float]:
         # Use tolerance-based membership to avoid floating-point mismatches
@@ -214,7 +214,7 @@ class Discrete(Variable):
             candidates.append(grid[nearest - 1])
         if nearest < len(grid) - 1:
             candidates.append(grid[nearest + 1])
-        return random.choice(candidates) if candidates else value
+        return random.choice(candidates) if candidates else value  # NOSONAR
 
 
 # ---------------------------------------------------------------------------
@@ -246,7 +246,7 @@ class Categorical(Variable):
         self._choices = list(choices)
 
     def sample(self, ctx: Context) -> Any:
-        return random.choice(self._choices)
+        return random.choice(self._choices)  # NOSONAR
 
     def filter(self, candidates: List[Any], ctx: Context) -> List[Any]:
         valid = set(self._choices)
@@ -254,7 +254,7 @@ class Categorical(Variable):
 
     def neighbor(self, value: Any, ctx: Context) -> Any:
         others = [c for c in self._choices if c != value]
-        return random.choice(others) if others else value
+        return random.choice(others) if others else value  # NOSONAR
 
 
 # ---------------------------------------------------------------------------

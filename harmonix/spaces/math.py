@@ -129,13 +129,13 @@ class NaturalNumber(Variable):
         self._hi = int(hi)
 
     def sample(self, ctx: Context) -> int:
-        return random.randint(self._lo, self._hi)
+        return random.randint(self._lo, self._hi)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         return [v for v in candidates if isinstance(v, int) and self._lo <= v <= self._hi]
 
     def neighbor(self, value: int, ctx: Context) -> int:
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         return max(self._lo, min(self._hi, value + delta))
 
 
@@ -159,13 +159,13 @@ class WholeNumber(Variable):
         self._hi = int(hi)
 
     def sample(self, ctx: Context) -> int:
-        return random.randint(0, self._hi)
+        return random.randint(0, self._hi)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         return [v for v in candidates if isinstance(v, int) and 0 <= v <= self._hi]
 
     def neighbor(self, value: int, ctx: Context) -> int:
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         return max(0, min(self._hi, value + delta))
 
 
@@ -191,13 +191,13 @@ class NegativeInt(Variable):
         self._lo = int(lo)
 
     def sample(self, ctx: Context) -> int:
-        return random.randint(self._lo, -1)
+        return random.randint(self._lo, -1)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         return [v for v in candidates if isinstance(v, int) and self._lo <= v <= -1]
 
     def neighbor(self, value: int, ctx: Context) -> int:
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         return max(self._lo, min(-1, value + delta))
 
 
@@ -223,14 +223,14 @@ class NegativeReal(Variable):
         self._lo = float(lo)
 
     def sample(self, ctx: Context) -> float:
-        return random.uniform(self._lo, -1e-9)
+        return random.uniform(self._lo, -1e-9)  # NOSONAR
 
     def filter(self, candidates: List[float], ctx: Context) -> List[float]:
         return [v for v in candidates if self._lo <= v < 0]
 
     def neighbor(self, value: float, ctx: Context) -> float:
         width = abs(self._lo)
-        new_v = value + random.gauss(0, 0.05 * width)
+        new_v = value + random.gauss(0, 0.05 * width)  # NOSONAR
         return max(self._lo, min(-1e-9, new_v))
 
 
@@ -256,13 +256,13 @@ class PositiveReal(Variable):
         self._hi = float(hi)
 
     def sample(self, ctx: Context) -> float:
-        return random.uniform(1e-9, self._hi)
+        return random.uniform(1e-9, self._hi)  # NOSONAR
 
     def filter(self, candidates: List[float], ctx: Context) -> List[float]:
         return [v for v in candidates if 0 < v <= self._hi]
 
     def neighbor(self, value: float, ctx: Context) -> float:
-        new_v = value + random.gauss(0, 0.05 * self._hi)
+        new_v = value + random.gauss(0, 0.05 * self._hi)  # NOSONAR
         return max(1e-9, min(self._hi, new_v))
 
 
@@ -301,7 +301,7 @@ class PrimeVariable(Variable):
             raise ValueError(f"No primes found in [{lo}, {hi}].")
 
     def sample(self, ctx: Context) -> int:
-        return random.choice(self._primes)
+        return random.choice(self._primes)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         return [v for v in candidates if v in self._prime_set]
@@ -310,7 +310,7 @@ class PrimeVariable(Variable):
         if value not in self._prime_set:
             return self.sample(ctx)
         idx = self._primes.index(value)
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         new_idx = max(0, min(len(self._primes) - 1, idx + delta))
         return self._primes[new_idx]
 
@@ -348,7 +348,7 @@ class PowerOfTwo(Variable):
             raise ValueError(f"No powers of two found in [{lo}, {hi}].")
 
     def sample(self, ctx: Context) -> int:
-        return random.choice(self._values)
+        return random.choice(self._values)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         valid = set(self._values)
@@ -358,7 +358,7 @@ class PowerOfTwo(Variable):
         if value not in self._values:
             return self.sample(ctx)
         idx = self._values.index(value)
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         new_idx = max(0, min(len(self._values) - 1, idx + delta))
         return self._values[new_idx]
 
@@ -393,7 +393,7 @@ class Fibonacci(Variable):
             raise ValueError(f"No Fibonacci numbers found in [{lo}, {hi}].")
 
     def sample(self, ctx: Context) -> int:
-        return random.choice(self._values)
+        return random.choice(self._values)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         valid = set(self._values)
@@ -403,6 +403,6 @@ class Fibonacci(Variable):
         if value not in self._values:
             return self.sample(ctx)
         idx = self._values.index(value)
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         new_idx = max(0, min(len(self._values) - 1, idx + delta))
         return self._values[new_idx]

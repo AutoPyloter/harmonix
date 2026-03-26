@@ -93,7 +93,7 @@ class CatalogueVariable(Variable):
         self._indices = list(range(n))
 
     def sample(self, ctx: Context) -> int:
-        return random.choice(self._indices)
+        return random.choice(self._indices)  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         valid = set(self._indices)
@@ -102,7 +102,7 @@ class CatalogueVariable(Variable):
     def neighbor(self, value: int, ctx: Context) -> int:
         if value not in self._indices:
             return self.sample(ctx)
-        delta = random.choice([-1, 1])
+        delta = random.choice([-1, 1])  # NOSONAR
         new_idx = max(0, min(len(self._indices) - 1, value + delta))
         return self._indices[new_idx]
 
@@ -117,7 +117,7 @@ class _DynamicGridVariable(Variable):
 
     def sample(self, ctx: Context) -> Optional[int]:
         codes = self._valid_codes(ctx)
-        return random.choice(codes) if codes else None
+        return random.choice(codes) if codes else None  # NOSONAR
 
     def filter(self, candidates: List[int], ctx: Context) -> List[int]:
         valid = set(self._valid_codes(ctx))
@@ -142,7 +142,7 @@ class _DynamicGridVariable(Variable):
                 neighbours.append(code)
 
         if neighbours:
-            return random.choice(neighbours)
+            return random.choice(neighbours)  # NOSONAR
         return value
 
 

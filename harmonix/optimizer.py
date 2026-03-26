@@ -242,12 +242,12 @@ class HarmonySearchOptimizer(ABC):
             source = []
 
         for name, var in self.space.items():
-            if random.random() < hmcr and source:
+            if random.random() < hmcr and source:  # NOSONAR
                 candidates = [h[name] for h in source]
                 valid = var.filter(candidates, ctx=ctx)
                 if valid:
-                    base = random.choice(valid)
-                    ctx[name] = var.neighbor(base, ctx=ctx) if random.random() < par else base
+                    base = random.choice(valid)  # NOSONAR
+                    ctx[name] = var.neighbor(base, ctx=ctx) if random.random() < par else base  # NOSONAR
                     continue
             ctx[name] = var.sample(ctx=ctx)
 
