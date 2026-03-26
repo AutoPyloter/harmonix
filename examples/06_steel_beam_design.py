@@ -80,8 +80,8 @@ def objective(harmony):
     sec = section_var.decode(idx)
 
     # Convert catalogue values to SI base units
-    wy_m3 = sec.Wy_cm3 * 1e-6  # cm³ → m³
-    iz_m4 = sec.Iy_cm4 * 1e-8  # cm⁴ → m⁴  (strong axis = Iy in catalogue)
+    wy_m3 = sec.wy_cm3 * 1e-6  # cm³ → m³
+    iz_m4 = sec.iy_cm4 * 1e-8  # cm⁴ → m⁴  (strong axis = Iy in catalogue)
     tw_m = sec.tw_mm * 1e-3  # mm  → m
     h_m = sec.h_mm * 1e-3  # mm  → m
 
@@ -135,8 +135,8 @@ if __name__ == "__main__":
     idx = result.best_harmony["section"]
     sec = section_var.decode(idx)
 
-    wy_m3 = sec.Wy_cm3 * 1e-6
-    iz_m4 = sec.Iy_cm4 * 1e-8
+    wy_m3 = sec.wy_cm3 * 1e-6
+    iz_m4 = sec.iy_cm4 * 1e-8
     tw_m = sec.tw_mm * 1e-3
     h_m = sec.h_mm * 1e-3
     fy_kpa = fy * 1e3
@@ -156,4 +156,4 @@ if __name__ == "__main__":
     print(f"  Deflect : δ = {delta*1000:.1f} mm  ≤  L/300 = {L/300*1000:.1f} mm  {'✓' if delta <= L/300 else '✗'}")
     print("\nSection properties:")
     print(f"  h = {sec.h_mm:.0f} mm,  b = {sec.b_mm:.0f} mm")
-    print(f"  A = {sec.A_cm2:.1f} cm²,  Iy = {sec.Iy_cm4:.0f} cm⁴,  Wy = {sec.Wy_cm3:.0f} cm³")
+    print(f"  A = {sec.a_cm2:.1f} cm²,  Iy = {sec.iy_cm4:.0f} cm⁴,  Wy = {sec.wy_cm3:.0f} cm³")

@@ -1,0 +1,4 @@
+# file: C:\Users\ASUS\Documents\GitHub\harmonix\harmonix\optimizer.py
+# hypothesis_version: 6.151.9
+
+[0.001, 0.05, 0.35, 0.85, 100, 500, 4096, 5000, '  best_harmony  = {', '  }', ')', ', ', 'HarmonyMemory', 'OptimizationResult(', '__bw__', '_evals', '_history', '_init', 'archive', 'archive_size', 'auto', 'bw_max', 'bw_min', 'cache_maxsize', 'callback', 'checkpoint_every', 'checkpoint_path', 'eval_log_path', 'fitness', 'harmonies', 'history_every', 'history_log_path', 'hmcr', 'init_log_path', 'iteration', 'log_evaluations', 'log_history', 'log_init', 'max_iter', 'memory', 'memory_size', 'min', 'mode', 'new', 'par', 'penalty', 'resume', 'size', 'use_cache', 'verbose']

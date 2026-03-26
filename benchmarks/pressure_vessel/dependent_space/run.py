@@ -139,20 +139,20 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     π·R²·L + (4/3)·π·R³ ≥ 1,296,000
     → −π·R²·L − (4/3)·π·R³ + 1,296,000 ≤ 0
     """
-    R: float = harmony["R"]
-    Ts: float = harmony["Ts"]
-    Th: float = harmony["Th"]
-    L: float = harmony["L"]
+    r: float = harmony["R"]
+    ts: float = harmony["Ts"]
+    th: float = harmony["Th"]
+    l: float = harmony["L"]
 
     # --- Guard against degenerate designs ---
-    if R <= 0.0 or Ts <= 0.0 or Th <= 0.0 or L <= 0.0:
+    if r <= 0.0 or ts <= 0.0 or th <= 0.0 or l <= 0.0:
         return float("inf"), float("inf")
 
     # --- Fabrication cost ---
-    cost: float = 0.6224 * Ts * R * L + 1.7781 * Th * R**2 + 3.1661 * Ts**2 * L + 19.84 * Ts**2 * R
+    cost: float = 0.6224 * ts * r * l + 1.7781 * th * r**2 + 3.1661 * ts**2 * l + 19.84 * ts**2 * r
 
     # --- Volume constraint (g3) ---
-    volume: float = math.pi * R**2 * L + (4.0 / 3.0) * math.pi * R**3
+    volume: float = math.pi * r**2 * l + (4.0 / 3.0) * math.pi * r**3
     g3: float = -volume + MIN_VOLUME
 
     penalty: float = max(0.0, g3)
@@ -199,9 +199,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Pressure Vessel — Dependent Space")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.2f}\n" f"Penalty: {result.best_penalty:.4f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.2f}\nPenalty: {result.best_penalty:.4f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Dependent Space] Optimal Cost: {result.best_fitness:.6f}")

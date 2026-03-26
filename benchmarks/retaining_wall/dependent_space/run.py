@@ -60,10 +60,10 @@ def _x3_min(ctx: Dict[str, float]) -> float:
     fc = round(ctx["fc"] / 5.0) * 5.0
     x4 = round(ctx["x4"] / 50.0) * 50.0
 
-    Vu_stem = 1.6 * (0.5 * KA * GAMMA_SOIL * H_STEM**2) * 1000.0  # N
+    vu_stem = 1.6 * (0.5 * KA * GAMMA_SOIL * H_STEM**2) * 1000.0  # N
     # phi * Vc = 0.75 * 0.17 * sqrt(f'c) * bw * d
     shear_cap_per_mm = 0.75 * 0.17 * math.sqrt(fc) * WIDTH_B
-    d_req = Vu_stem / shear_cap_per_mm
+    d_req = vu_stem / shear_cap_per_mm
 
     return float(max(300.0, x4, math.ceil((d_req + COVER) / 50.0) * 50.0))
 
@@ -75,8 +75,8 @@ def check_geotech_stability(x1, x2, x3, x4, x5) -> bool:
     if l_heel < 0:
         return False
 
-    Pa = 0.5 * KA * GAMMA_SOIL * (h_tot**2)
-    Mo = Pa * (h_tot / 3.0)
+    pa = 0.5 * KA * GAMMA_SOIL * (h_tot**2)
+    mo = pa * (h_tot / 3.0)
 
     w_base = (x1 / 1000.0) * t_base_m * GAMMA_CONC
     w_base_x = (x1 / 1000.0) / 2.0
@@ -90,12 +90,12 @@ def check_geotech_stability(x1, x2, x3, x4, x5) -> bool:
     w_soil = (l_heel / 1000.0) * H_STEM * GAMMA_SOIL
     w_soil_x = (x1 - l_heel / 2.0) / 1000.0
 
-    sum_W = w_base + w_stem_rect + w_stem_tri + w_soil
-    Mr = (w_base * w_base_x) + (w_stem_rect * w_stem_rect_x) + (w_stem_tri * w_stem_tri_x) + (w_soil * w_soil_x)
+    sum_w = w_base + w_stem_rect + w_stem_tri + w_soil
+    mr = (w_base * w_base_x) + (w_stem_rect * w_stem_rect_x) + (w_stem_tri * w_stem_tri_x) + (w_soil * w_soil_x)
 
-    fs_ov = Mr / Mo if Mo > 0 else 100.0
-    fs_sl = (sum_W * math.tan(PHI_SOIL)) / Pa
-    e = abs((x1 / 2000.0) - ((Mr - Mo) / sum_W))
+    fs_ov = mr / mo if mo > 0 else 100.0
+    fs_sl = (sum_w * math.tan(PHI_SOIL)) / pa
+    e = abs((x1 / 2000.0) - ((mr - mo) / sum_w))
 
     return fs_ov >= 2.5 and fs_sl >= 2.5 and e <= (x1 / 6000.0)
 
@@ -171,18 +171,18 @@ def objective(config: Dict[str, Any]) -> Tuple[float, float]:
     l_heel = x1 - x2 - x3
 
     # Demands
-    Pa_stem = 0.5 * KA * GAMMA_SOIL * (H_STEM**2)
-    Mu_stem = 1.6 * Pa_stem * (H_STEM / 3.0)
+    pa_stem = 0.5 * KA * GAMMA_SOIL * (H_STEM**2)
+    mu_stem = 1.6 * pa_stem * (H_STEM / 3.0)
     d_stem = x3 - COVER
 
     w_heel_total = 1.2 * (GAMMA_SOIL * H_STEM + GAMMA_CONC * t_base_m)
-    Vu_heel_N = w_heel_total * (l_heel / 1000.0) * 1000.0
-    Mu_heel = w_heel_total * ((l_heel / 1000.0) ** 2 / 2.0)
+    vu_heel_n = w_heel_total * (l_heel / 1000.0) * 1000.0
+    mu_heel = w_heel_total * ((l_heel / 1000.0) ** 2 / 2.0)
     d_base = x5 - COVER
 
     # Embed shear check for heel (dynamically penalized if it fails because x5 wasn't pruned)
-    phi_Vc_heel = 0.75 * 0.17 * math.sqrt(fc) * WIDTH_B * d_base
-    shear_pen = max(0.0, Vu_heel_N - phi_Vc_heel) ** 2 * 1e4
+    phi_vc_heel = 0.75 * 0.17 * math.sqrt(fc) * WIDTH_B * d_base
+    shear_pen = max(0.0, vu_heel_n - phi_vc_heel) ** 2 * 1e4
 
     code_stem = config["dc_stem"]
     code_base = config["dc_base"]
@@ -190,21 +190,21 @@ def objective(config: Dict[str, Any]) -> Tuple[float, float]:
     if code_stem is None or code_base is None or l_heel < 0:
         return 1e12, 1e8 + space_penalty
 
-    As_s = steel_area(code_stem)
-    As_b = steel_area(code_base)
+    as_s = steel_area(code_stem)
+    as_b = steel_area(code_base)
 
     # Check Flexure (Because ACIRebar handles rho & fit, but we must verify Moment limit)
-    a_stem = (As_s * FY_MPA) / (0.85 * fc * WIDTH_B)
-    phi_Mn_stem = 0.9 * As_s * FY_MPA * max(0.1, d_stem - a_stem / 2.0) * 1e-6
-    mu_pen_stem = max(0.0, Mu_stem - phi_Mn_stem) ** 2 * 1e4
+    a_stem = (as_s * FY_MPA) / (0.85 * fc * WIDTH_B)
+    phi_mn_stem = 0.9 * as_s * FY_MPA * max(0.1, d_stem - a_stem / 2.0) * 1e-6
+    mu_pen_stem = max(0.0, mu_stem - phi_mn_stem) ** 2 * 1e4
 
-    a_base = (As_b * FY_MPA) / (0.85 * fc * WIDTH_B)
-    phi_Mn_base = 0.9 * As_b * FY_MPA * max(0.1, d_base - a_base / 2.0) * 1e-6
-    mu_pen_base = max(0.0, Mu_heel - phi_Mn_base) ** 2 * 1e4
+    a_base = (as_b * FY_MPA) / (0.85 * fc * WIDTH_B)
+    phi_mn_base = 0.9 * as_b * FY_MPA * max(0.1, d_base - a_base / 2.0) * 1e-6
+    mu_pen_base = max(0.0, mu_heel - phi_mn_base) ** 2 * 1e4
 
     vol_conc = (x1 / 1000.0) * t_base_m + 0.5 * (x3 + x4) / 1000.0 * H_STEM
     cost_conc = (0.5 + 0.02 * fc) * vol_conc
-    cost_steel = 50.0 * (As_s + As_b) / 1000.0
+    cost_steel = 50.0 * (as_s + as_b) / 1000.0
     total_cost = cost_conc + cost_steel
 
     return total_cost, space_penalty + shear_pen + mu_pen_stem + mu_pen_base

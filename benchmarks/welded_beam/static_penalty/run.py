@@ -101,7 +101,7 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
 
     sigma = 6 * P * L / (x4 * x3**2)
     delta = 4 * P * L**3 / (E * x3**3 * x4)
-    Pc = ((4.013 * E * math.sqrt((x3**2 * x4**6) / 36.0)) / L**2) * (1.0 - (x3 / (2 * L)) * math.sqrt(E / (4 * G)))
+    pc = ((4.013 * E * math.sqrt((x3**2 * x4**6) / 36.0)) / L**2) * (1.0 - (x3 / (2 * L)) * math.sqrt(E / (4 * G)))
 
     # --- All 7 constraints ---
     g1 = tau - TAU_MAX
@@ -110,7 +110,7 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     g4 = 0.10471 * x1**2 + 0.04811 * x3 * x4 * (14.0 + x2) - 5.0
     g5 = 0.125 - x1
     g6 = delta - DELTA_MAX
-    g7 = P - Pc
+    g7 = P - pc
 
     penalty: float = sum(max(0.0, g) for g in [g1, g2, g3, g4, g5, g6, g7])
     cost: float = 1.10471 * x1**2 * x2 + 0.04811 * x3 * x4 * (14.0 + x2)
@@ -157,9 +157,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Welded Beam — Static Penalty")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.4f}\n" f"Penalty: {result.best_penalty:.4f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.4f}\nPenalty: {result.best_penalty:.4f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Static Penalty] Optimal Cost: {result.best_fitness:.6f}")

@@ -122,15 +122,20 @@ _DIAMETERS: List[float] = [
 ]
 _COUNTS: List[int] = list(range(4, 42))  # 4 … 41 bars
 
+# All 8 Moore-neighbour offsets for the (diameter × count) discrete grid.
+_MOORE_OFFSETS: List[Tuple[int, int]] = [
+    (di, dj) for di in (-1, 0, 1) for dj in (-1, 0, 1) if not (di == 0 and dj == 0)
+]
+
 
 # ---------------------------------------------------------------------------
 # ACI 318 limit computations  (shared between single- and double-row)
 # ---------------------------------------------------------------------------
 
 
-def _aci_limits(fc: float, fy: float) -> Tuple[float, float, float, float, float]:
+def _aci_limits(fc: float, fy: float) -> Tuple[float, float, float, float]:
     """
-    Return (β₁, φ, ε_cu, ρ_min, ρ_max) using MPa units throughout.
+    Return (β₁, ε_cu, ρ_min, ρ_max) using MPa units throughout.
 
     Parameters
     ----------
@@ -152,7 +157,6 @@ def _aci_limits(fc: float, fy: float) -> Tuple[float, float, float, float, float
     else:
         beta1 = 0.65
 
-    phi = 0.85
     eps_c = 0.003  # ACI crushing strain
 
     rho_min = max(
@@ -161,7 +165,7 @@ def _aci_limits(fc: float, fy: float) -> Tuple[float, float, float, float, float
     )
     rho_max = 0.85 * beta1 * (fc / fy) * (eps_c / (eps_c + 0.004))
 
-    return beta1, phi, eps_c, rho_min, rho_max
+    return beta1, eps_c, rho_min, rho_max
 
 
 def _bar_is_valid_single(
@@ -170,7 +174,6 @@ def _bar_is_valid_single(
     d_eff: float,
     cc: float,
     beta1: float,
-    phi: float,
     eps_c: float,
     rho_min: float,
     rho_max: float,
@@ -269,7 +272,7 @@ class ACIRebar(Variable):
 
     def _valid_codes(self, ctx: Context) -> List[int]:
         d, cc, fc, fy = self._resolve(ctx)
-        beta1, phi, eps_c, rho_min, rho_max = _aci_limits(fc, fy)
+        beta1, eps_c, rho_min, rho_max = _aci_limits(fc, fy)
         codes: List[int] = []
         for i, (area50, dia) in enumerate(zip(_AREAS_50, _DIAMETERS)):
             for j, count in enumerate(_COUNTS):
@@ -279,7 +282,6 @@ class ACIRebar(Variable):
                     d,
                     cc,
                     beta1,
-                    phi,
                     eps_c,
                     rho_min,
                     rho_max,
@@ -313,16 +315,16 @@ class ACIRebar(Variable):
 
         i = value // self._n
         j = value % self._n
+
         neighbours: List[int] = []
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
-                if di == 0 and dj == 0:
-                    continue
-                ni, nj = i + di, j + dj
-                if 0 <= ni < len(_DIAMETERS) and 0 <= nj < len(_COUNTS):
-                    code = ni * self._n + nj
-                    if code in valid:
-                        neighbours.append(code)
+        for di, dj in _MOORE_OFFSETS:
+            ni, nj = i + di, j + dj
+            if not (0 <= ni < len(_DIAMETERS) and 0 <= nj < len(_COUNTS)):
+                continue
+            code = ni * self._n + nj
+            if code in valid:
+                neighbours.append(code)
+
         return random.choice(neighbours) if neighbours else value
 
     # --- decode ------------------------------------------------------------
@@ -406,7 +408,7 @@ class ACIDoubleRebar(Variable):
 
     def _valid_codes(self, ctx: Context) -> List[int]:
         d1, d2, cc = self._resolve(ctx)
-        beta1, phi, eps_c, rho_min, rho_max = _aci_limits(self.fc, self.fy)
+        beta1, eps_c, rho_min, rho_max = _aci_limits(self.fc, self.fy)
         codes: List[int] = []
         for i, (area50, dia) in enumerate(zip(_AREAS_50, _DIAMETERS)):
             for j, count in enumerate(_COUNTS):
@@ -416,7 +418,6 @@ class ACIDoubleRebar(Variable):
                     d1,
                     cc,
                     beta1,
-                    phi,
                     eps_c,
                     rho_min,
                     rho_max,
@@ -430,7 +431,6 @@ class ACIDoubleRebar(Variable):
                     d2,
                     cc,
                     beta1,
-                    phi,
                     eps_c,
                     rho_min,
                     rho_max,
@@ -456,16 +456,16 @@ class ACIDoubleRebar(Variable):
             return value
         i = value // self._n
         j = value % self._n
+
         neighbours: List[int] = []
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
-                if di == 0 and dj == 0:
-                    continue
-                ni, nj = i + di, j + dj
-                if 0 <= ni < len(_DIAMETERS) and 0 <= nj < len(_COUNTS):
-                    code = ni * self._n + nj
-                    if code in valid:
-                        neighbours.append(code)
+        for di, dj in _MOORE_OFFSETS:
+            ni, nj = i + di, j + dj
+            if not (0 <= ni < len(_DIAMETERS) and 0 <= nj < len(_COUNTS)):
+                continue
+            code = ni * self._n + nj
+            if code in valid:
+                neighbours.append(code)
+
         return random.choice(neighbours) if neighbours else value
 
     def decode(self, code: int) -> Tuple[float, int]:
@@ -529,26 +529,6 @@ class SectionProperties:
     iz_cm4: float
     wz_cm3: float
     mass_kg_m: float
-
-    @property
-    def A_cm2(self) -> float:
-        return self.a_cm2
-
-    @property
-    def Iy_cm4(self) -> float:
-        return self.iy_cm4
-
-    @property
-    def Wy_cm3(self) -> float:
-        return self.wy_cm3
-
-    @property
-    def Iz_cm4(self) -> float:
-        return self.iz_cm4
-
-    @property
-    def Wz_cm3(self) -> float:
-        return self.wz_cm3
 
 
 # ---------------------------------------------------------------------------
@@ -811,26 +791,6 @@ class ConcreteGradeProperties:
     ecm_gpa: float
     eps_cu: float
 
-    @property
-    def fck_MPa(self) -> float:
-        return self.fck_mpa
-
-    @property
-    def fck_cube_MPa(self) -> float:
-        return self.fck_cube_mpa
-
-    @property
-    def fcm_MPa(self) -> float:
-        return self.fcm_mpa
-
-    @property
-    def fctm_MPa(self) -> float:
-        return self.fctm_mpa
-
-    @property
-    def Ecm_GPa(self) -> float:
-        return self.ecm_gpa
-
 
 _CONCRETE_GRADES: List[ConcreteGradeProperties] = [
     # name        fck   fck_cube  fcm    fctm   Ecm   eps_cu
@@ -947,22 +907,6 @@ class SoilProfile:
     cu_kpa: float
     dr_pct: float
     vs30_mps: float
-
-    @property
-    def N_lo(self) -> int:
-        return self.n_lo
-
-    @property
-    def N_hi(self) -> int:
-        return self.n_hi
-
-    @property
-    def cu_kPa(self) -> float:
-        return self.cu_kpa
-
-    @property
-    def Dr_pct(self) -> float:
-        return self.dr_pct
 
 
 _SOIL_PROFILES: List[SoilProfile] = [
@@ -1090,10 +1034,6 @@ class SeismicZone:
     SDS: float
     SD1: float
     PGA: float
-
-    @property
-    def Ss(self) -> float:
-        return self.ss
 
 
 # Representative TBDY 2018 / AFAD TDTH grid (DD-2, 475-yr return period)

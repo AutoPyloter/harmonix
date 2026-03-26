@@ -125,7 +125,7 @@ class TestNegativeReal:
 
     def test_filter_and_neighbor_clamp(self):
         v = NegativeReal(lo=-10.0)
-        assert v.filter([-10.0, -5.0, 0.0, 1.0], {}) == [-10.0, -5.0]
+        assert v.filter([-10.0, -5.0, 0.0, 1.0], {}) == pytest.approx([-10.0, -5.0])
         for _ in range(20):
             nb = v.neighbor(-1e-9, {})
             assert -10.0 <= nb <= -1e-9
@@ -143,7 +143,7 @@ class TestPositiveReal:
 
     def test_filter_and_neighbor_clamp(self):
         v = PositiveReal(hi=10.0)
-        assert v.filter([-1.0, 0.0, 1e-9, 3.0, 11.0], {}) == [1e-9, 3.0]
+        assert v.filter([-1.0, 0.0, 1e-9, 3.0, 11.0], {}) == pytest.approx([1e-9, 3.0])
         for _ in range(20):
             nb = v.neighbor(10.0, {})
             assert 1e-9 <= nb <= 10.0
@@ -387,7 +387,7 @@ class TestSteelSection:
         idx = var.sample({})
         sec = var.decode(idx)
         assert sec.series == "IPE"
-        assert sec.Iy_cm4 > 0
+        assert sec.iy_cm4 > 0
         assert sec.mass_kg_m > 0
 
     def test_filter(self):
@@ -505,7 +505,7 @@ class TestConcreteGrade:
         for _ in range(30):
             idx = var.sample({})
             g = var.decode(idx)
-            assert 25 <= g.fck_MPa <= 50
+            assert 25 <= g.fck_mpa <= 50
 
     def test_filter(self):
         var = ConcreteGrade()
@@ -527,8 +527,8 @@ class TestConcreteGrade:
         var = ConcreteGrade()
         for idx in var._indices:
             g = var.decode(idx)
-            assert g.fcm_MPa == g.fck_MPa + 8
-            assert g.Ecm_GPa > 0
+            assert g.fcm_mpa == g.fck_mpa + 8
+            assert g.ecm_gpa > 0
 
     def test_invalid_range_raises(self):
         with pytest.raises(ValueError):

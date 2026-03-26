@@ -73,7 +73,7 @@ HEAVY_PENALTY: float = 1e9  # Penalty for geometrically infeasible R
 # ---------------------------------------------------------------------------
 # Helper: volume-derived minimum L
 # ---------------------------------------------------------------------------
-def _l_min_from_volume(R: float) -> float:
+def _l_min_from_volume(r: float) -> float:
     """
     Invert the volume equation to find the minimum cylindrical length
     that satisfies g3 for a given inner radius R.
@@ -85,11 +85,11 @@ def _l_min_from_volume(R: float) -> float:
     sufficient volume, making L_min negative.  The result is clamped
     to a minimum of 10.0 (the benchmark lower bound for L).
     """
-    head_volume: float = (4.0 / 3.0) * math.pi * R**3
+    head_volume: float = (4.0 / 3.0) * math.pi * r**3
     remaining: float = MIN_VOLUME - head_volume
     if remaining <= 0:
         return 10.0  # heads alone satisfy volume
-    return remaining / (math.pi * R**2)
+    return remaining / (math.pi * r**2)
 
 
 # ---------------------------------------------------------------------------
@@ -160,22 +160,22 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     For all other designs the penalty is 0.0 because the space
     guarantees g1–g4 satisfaction.
     """
-    R: float = harmony["R"]
-    Ts: float = harmony["Ts"]
-    Th: float = harmony["Th"]
-    L: float = harmony["L"]
+    r: float = harmony["R"]
+    ts: float = harmony["Ts"]
+    th: float = harmony["Th"]
+    l: float = harmony["L"]
 
-    if R <= 0.0 or Ts <= 0.0 or Th <= 0.0 or L <= 0.0:
+    if r <= 0.0 or ts <= 0.0 or th <= 0.0 or l <= 0.0:
         return float("inf"), float("inf")
 
     # --- Check geometric feasibility of R ---------------------------------
-    l_min_required: float = _l_min_from_volume(R)
+    l_min_required: float = _l_min_from_volume(r)
     if l_min_required > 240.0:
         # This R is too small — no valid L can satisfy the volume.
         return HEAVY_PENALTY, HEAVY_PENALTY
 
     # --- Fabrication cost --------------------------------------------------
-    cost: float = 0.6224 * Ts * R * L + 1.7781 * Th * R**2 + 3.1661 * Ts**2 * L + 19.84 * Ts**2 * R
+    cost: float = 0.6224 * ts * r * l + 1.7781 * th * r**2 + 3.1661 * ts**2 * l + 19.84 * ts**2 * r
 
     return cost, 0.0
 
@@ -219,9 +219,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Pressure Vessel — Semi-Dependent Space")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.2f}\n" f"Penalty: {result.best_penalty:.4f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.2f}\nPenalty: {result.best_penalty:.4f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Semi-Dependent] Optimal Cost: {result.best_fitness:.6f}")

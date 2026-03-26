@@ -128,11 +128,11 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     tau_dash = P / (math.sqrt(2) * x1 * x2)
     tau_dash_dash = M * R / J
     tau = math.sqrt(tau_dash**2 + 2 * tau_dash * tau_dash_dash * (x2 / (2 * R)) + tau_dash_dash**2)
-    Pc = ((4.013 * E * math.sqrt((x3**2 * x4**6) / 36.0)) / L**2) * (1.0 - (x3 / (2 * L)) * math.sqrt(E / (4 * G)))
+    pc = ((4.013 * E * math.sqrt((x3**2 * x4**6) / 36.0)) / L**2) * (1.0 - (x3 / (2 * L)) * math.sqrt(E / (4 * G)))
 
     g1 = tau - TAU_MAX
     g4 = 0.10471 * x1**2 + 0.04811 * x3 * x4 * (14.0 + x2) - 5.0
-    g7 = P - Pc
+    g7 = P - pc
 
     penalty: float = max(0.0, g1) + max(0.0, g4) + max(0.0, g7)
     cost: float = 1.10471 * x1**2 * x2 + 0.04811 * x3 * x4 * (14.0 + x2)
@@ -179,9 +179,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Welded Beam — Dependent Space")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.4f}\n" f"Penalty: {result.best_penalty:.4f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.4f}\nPenalty: {result.best_penalty:.4f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Dependent Space] Optimal Cost: {result.best_fitness:.6f}")

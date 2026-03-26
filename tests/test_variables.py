@@ -39,20 +39,20 @@ from harmonix.variables import (
 class TestFrange:
     def test_simple_integer_steps(self):
         result = _frange(0.0, 1.0, 3.0)
-        assert result == [0.0, 1.0, 2.0, 3.0]
+        assert result == pytest.approx([0.0, 1.0, 2.0, 3.0])
 
     def test_endpoint_always_included(self):
         """hi must always appear as the last element."""
         result = _frange(0.0, 3.0, 10.0)
-        assert result[-1] == 10.0
+        assert result[-1] == pytest.approx(10.0)
 
     def test_fractional_step(self):
         result = _frange(0.0, 0.5, 2.0)
-        assert result == [0.0, 0.5, 1.0, 1.5, 2.0]
+        assert result == pytest.approx([0.0, 0.5, 1.0, 1.5, 2.0])
 
     def test_single_element_lo_equals_hi(self):
         result = _frange(5.0, 1.0, 5.0)
-        assert result == [5.0]
+        assert result == pytest.approx([5.0])
 
     def test_step_larger_than_range(self):
         """step > (hi - lo): should return [lo, hi]."""
@@ -77,8 +77,8 @@ class TestFrange:
 
     def test_negative_range(self):
         result = _frange(-3.0, 1.0, 0.0)
-        assert result[0] == -3.0
-        assert result[-1] == 0.0
+        assert result[0] == pytest.approx(-3.0)
+        assert result[-1] == pytest.approx(0.0)
 
 
 # ===========================================================================
@@ -188,7 +188,7 @@ class TestContinuousFilter:
     def test_filter_keeps_in_range(self):
         v = Continuous(2.0, 5.0)
         result = v.filter([1.0, 2.0, 3.5, 5.0, 6.0], {})
-        assert result == [2.0, 3.5, 5.0]
+        assert result == pytest.approx([2.0, 3.5, 5.0])
 
     def test_filter_empty_input(self):
         v = Continuous(0.0, 1.0)
@@ -206,7 +206,7 @@ class TestContinuousFilter:
     def test_filter_with_dependent_bounds(self):
         v = Continuous(lo=lambda ctx: ctx["lo"], hi=lambda ctx: ctx["hi"])
         result = v.filter([0.0, 1.5, 3.0, 5.0], {"lo": 1.0, "hi": 4.0})
-        assert result == [1.5, 3.0]
+        assert result == pytest.approx([1.5, 3.0])
 
     def test_filter_boundary_values_included(self):
         v = Continuous(1.0, 4.0)
@@ -635,7 +635,7 @@ class TestDependentChain:
         b = Continuous(lo=lambda ctx: ctx["a"], hi=10.0)
         ctx = {"a": 5.0}
         result = b.filter([3.0, 5.0, 7.0, 11.0], ctx)
-        assert result == [5.0, 7.0]
+        assert result == pytest.approx([5.0, 7.0])
 
     def test_neighbor_with_dependent_bounds(self):
         """Dependent neighbor [a, 10] aralığında kalmalı."""

@@ -182,9 +182,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Spring Design — Semi-Dependent Space")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.6f}\n" f"Penalty: {result.best_penalty:.6f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.6f}\nPenalty: {result.best_penalty:.6f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Semi-Dependent] Optimal Cost: {result.best_fitness:.8f}")

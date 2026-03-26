@@ -75,7 +75,7 @@ class TestVariableEdgeCases:
 
     def test_continuous_lo_eq_hi_filter(self):
         v = Continuous(3.0, 3.0)
-        assert v.filter([2.0, 3.0, 4.0], {}) == [3.0]
+        assert v.filter([2.0, 3.0, 4.0], {}) == pytest.approx([3.0])
 
     def test_continuous_lo_eq_hi_neighbor(self):
         v = Continuous(3.0, 3.0)
@@ -604,8 +604,8 @@ class TestEngineeringPhysics:
         for idx in var._indices:
             props = var.decode(idx)
             assert (
-                abs(props.fcm_MPa - (props.fck_MPa + 8)) < 0.1
-            ), f"{props.name}: fcm={props.fcm_MPa}, fck+8={props.fck_MPa + 8}"
+                abs(props.fcm_mpa - (props.fck_mpa + 8)) < 0.1
+            ), f"{props.name}: fcm={props.fcm_mpa}, fck+8={props.fck_mpa + 8}"
 
     def test_concrete_grade_ecm_formula(self):
         """EC2: Ecm = 22 * (fcm/10)^0.3 GPa."""
@@ -614,10 +614,10 @@ class TestEngineeringPhysics:
         var = ConcreteGrade()
         for idx in var._indices:
             props = var.decode(idx)
-            expected_ecm = 22.0 * (props.fcm_MPa / 10.0) ** 0.3
+            expected_ecm = 22.0 * (props.fcm_mpa / 10.0) ** 0.3
             assert (
-                abs(props.Ecm_GPa - expected_ecm) < 0.5
-            ), f"{props.name}: Ecm={props.Ecm_GPa:.2f}, expected={expected_ecm:.2f}"
+                abs(props.ecm_gpa - expected_ecm) < 0.5
+            ), f"{props.name}: Ecm={props.ecm_gpa:.2f}, expected={expected_ecm:.2f}"
 
     def test_aci_rebar_all_valid_codes_satisfy_rho(self):
         """_valid_codes içindeki her kod _bar_is_valid_single'dan geçmeli."""
@@ -635,7 +635,7 @@ class TestEngineeringPhysics:
         codes = var._valid_codes({})
         assert len(codes) > 0, "Geçerli kod döndürülmedi"
 
-        beta1, phi, eps_c, rho_min, rho_max = _aci_limits(fc, fy)
+        beta1, eps_c, rho_min, rho_max = _aci_limits(fc, fy)
         n_counts = len(_COUNTS)
 
         for code in codes:
@@ -650,7 +650,6 @@ class TestEngineeringPhysics:
                 d_eff,
                 cc,
                 beta1,
-                phi,
                 eps_c,
                 rho_min,
                 rho_max,
@@ -677,6 +676,6 @@ class TestEngineeringPhysics:
         for idx in var._indices:
             sec = var.decode(idx)
             if sec.h_mm > 0:
-                wy_approx = sec.Iy_cm4 / (sec.h_mm / 2 / 10)
-                ratio = wy_approx / sec.Wy_cm3 if sec.Wy_cm3 > 0 else 1.0
-                assert 0.8 <= ratio <= 1.25, f"{sec.name}: Wy={sec.Wy_cm3:.1f}, approx={wy_approx:.1f}"
+                wy_approx = sec.iy_cm4 / (sec.h_mm / 2 / 10)
+                ratio = wy_approx / sec.wy_cm3 if sec.wy_cm3 > 0 else 1.0
+                assert 0.8 <= ratio <= 1.25, f"{sec.name}: Wy={sec.wy_cm3:.1f}, approx={wy_approx:.1f}"

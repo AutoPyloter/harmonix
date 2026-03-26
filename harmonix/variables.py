@@ -112,9 +112,8 @@ class Continuous(Variable):
 
     def __init__(self, lo, hi):
         # Validate static bounds early (callable bounds checked at sample time)
-        if not callable(lo) and not callable(hi):
-            if float(lo) > float(hi):
-                raise ValueError(f"Continuous: lo ({lo}) must be <= hi ({hi}).")
+        if not callable(lo) and not callable(hi) and float(lo) > float(hi):
+            raise ValueError(f"Continuous: lo ({lo}) must be <= hi ({hi}).")
         self._lo = lo
         self._hi = hi
 

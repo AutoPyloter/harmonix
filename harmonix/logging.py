@@ -32,6 +32,7 @@ create them manually.
 from __future__ import annotations
 
 import csv
+import re
 import time
 from collections import OrderedDict
 from pathlib import Path
@@ -61,10 +62,15 @@ def _resolve_path(
     3. ``None`` — logging disabled.
     """
     if explicit is not None:
-        return Path(explicit)
+        # Normalize the user-provided path so that subsequent filesystem
+        # operations use a canonical absolute location.
+        return Path(explicit).expanduser().resolve()
     if checkpoint_path is not None:
-        base = Path(checkpoint_path)
-        return base.with_name(base.stem + suffix + ".csv")
+        base = Path(checkpoint_path).expanduser().resolve()
+        # Sanitize the derived stem to avoid accidentally embedding unusual
+        # characters from user-controlled filenames into output paths.
+        safe_stem = re.sub(r"[^a-zA-Z0-9._-]+", "_", base.stem)
+        return base.with_name(f"{safe_stem}{suffix}.csv")
     return None
 
 

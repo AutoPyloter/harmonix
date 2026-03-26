@@ -82,23 +82,23 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     Term 3:  3.1661 · Ts² · L         — longitudinal shell forming
     Term 4: 19.84   · Ts² · R         — circumferential shell forming
     """
-    Ts: float = harmony["Ts"]
-    Th: float = harmony["Th"]
-    R: float = harmony["R"]
-    L: float = harmony["L"]
+    ts: float = harmony["Ts"]
+    th: float = harmony["Th"]
+    r: float = harmony["R"]
+    l: float = harmony["L"]
 
     # --- Guard against degenerate designs ---
-    if Ts <= 0 or Th <= 0 or R <= 0 or L <= 0:
+    if ts <= 0 or th <= 0 or r <= 0 or l <= 0:
         return float("inf"), float("inf")
 
     # --- Fabrication cost ---
-    cost: float = 0.6224 * Ts * R * L + 1.7781 * Th * R**2 + 3.1661 * Ts**2 * L + 19.84 * Ts**2 * R
+    cost: float = 0.6224 * ts * r * l + 1.7781 * th * r**2 + 3.1661 * ts**2 * l + 19.84 * ts**2 * r
 
     # --- All 4 constraints ---
-    g1 = -Ts + 0.0193 * R  # shell hoop
-    g2 = -Th + 0.00954 * R  # head hoop
-    g3 = -(math.pi * R**2 * L) - (4.0 / 3.0) * math.pi * R**3 + MIN_VOLUME  # volume
-    g4 = L - 240.0  # length
+    g1 = -ts + 0.0193 * r  # shell hoop
+    g2 = -th + 0.00954 * r  # head hoop
+    g3 = -(math.pi * r**2 * l) - (4.0 / 3.0) * math.pi * r**3 + MIN_VOLUME  # volume
+    g4 = l - 240.0  # length
 
     penalty: float = sum(max(0.0, g) for g in [g1, g2, g3, g4])
 
@@ -144,9 +144,7 @@ def main() -> None:
     # --- convergence.png ---
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Pressure Vessel — Static Penalty")
-    plotter.add_info_box(
-        f"Cost: {result.best_fitness:.2f}\n" f"Penalty: {result.best_penalty:.4f}\n" f"Time: {t_elapsed:.2f}s"
-    )
+    plotter.add_info_box(f"Cost: {result.best_fitness:.2f}\nPenalty: {result.best_penalty:.4f}\nTime: {t_elapsed:.2f}s")
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
     print(f"[Static Penalty] Optimal Cost: {result.best_fitness:.6f}")

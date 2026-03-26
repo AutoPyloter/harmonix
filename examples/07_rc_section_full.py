@@ -88,7 +88,7 @@ space.add("d", Discrete(300.0, 50.0, 900.0))
 rebar_var = ACIRebar(
     d_expr=lambda ctx: ctx["d"] / 1000.0,  # mm → m
     cc_expr=cover,
-    fc=lambda ctx: concrete_var.decode(ctx["grade_idx"]).fck_MPa,
+    fc=lambda ctx: concrete_var.decode(ctx["grade_idx"]).fck_mpa,
     fy=fy,
 )
 space.add("rebar", rebar_var)
@@ -127,7 +127,7 @@ def objective(h):
         return 1e12, 1e6
 
     grade = concrete_var.decode(grade_idx)
-    fc = grade.fck_MPa
+    fc = grade.fck_mpa
     steel_area_mm2 = steel_area(code)
 
     # Moment capacity
@@ -171,12 +171,12 @@ if __name__ == "__main__":
     code = result.best_harmony["rebar"]
 
     grade = concrete_var.decode(grade_idx)
-    fc = grade.fck_MPa
+    fc = grade.fck_mpa
     steel_area_mm2 = steel_area(code)
     phi_mn = moment_capacity(b, d, steel_area_mm2, fc, fy)
 
     print("\nOptimal design:")
-    print(f"  Concrete grade : {grade.name}  (fck = {fc} MPa, Ecm = {grade.Ecm_GPa} GPa)")
+    print(f"  Concrete grade : {grade.name}  (fck = {fc} MPa, Ecm = {grade.ecm_gpa} GPa)")
     print(f"  Section        : b = {b:.0f} mm × d = {d:.0f} mm")
     print(f"  {rebar_var.describe(code)}  (A_s = {steel_area_mm2:.0f} mm²)")
     print("\nStrength check:")

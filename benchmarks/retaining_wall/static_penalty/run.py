@@ -83,8 +83,8 @@ def objective(config: Dict[str, Any]) -> Tuple[float, float]:
     h_tot = H_STEM + t_base_m
 
     # Active Earth Thrust
-    Pa = 0.5 * KA * GAMMA_SOIL * (h_tot**2)
-    Mo = Pa * (h_tot / 3.0)
+    pa = 0.5 * KA * GAMMA_SOIL * (h_tot**2)
+    mo = pa * (h_tot / 3.0)
 
     # Weights and Centers
     w_base = (x1 / 1000.0) * t_base_m * GAMMA_CONC
@@ -99,61 +99,61 @@ def objective(config: Dict[str, Any]) -> Tuple[float, float]:
     w_soil = (l_heel / 1000.0) * H_STEM * GAMMA_SOIL
     w_soil_x = (x1 - l_heel / 2.0) / 1000.0
 
-    sum_W = w_base + w_stem_rect + w_stem_tri + w_soil
-    Mr = (w_base * w_base_x) + (w_stem_rect * w_stem_rect_x) + (w_stem_tri * w_stem_tri_x) + (w_soil * w_soil_x)
+    sum_w = w_base + w_stem_rect + w_stem_tri + w_soil
+    mr = (w_base * w_base_x) + (w_stem_rect * w_stem_rect_x) + (w_stem_tri * w_stem_tri_x) + (w_soil * w_soil_x)
 
-    fs_overturning = Mr / Mo if Mo > 0 else 100.0
-    fs_sliding = (sum_W * math.tan(PHI_SOIL)) / Pa
+    fs_overturning = mr / mo if mo > 0 else 100.0
+    fs_sliding = (sum_w * math.tan(PHI_SOIL)) / pa
 
     # Eccentricity
-    e = (x1 / 2000.0) - ((Mr - Mo) / sum_W)
+    e = (x1 / 2000.0) - ((mr - mo) / sum_w)
 
     # --- Structural ACI Demands ---
     # Stem at base
-    Pa_stem = 0.5 * KA * GAMMA_SOIL * (H_STEM**2)
-    Vu_stem = 1.6 * Pa_stem
-    Mu_stem = 1.6 * Pa_stem * (H_STEM / 3.0)
+    pa_stem = 0.5 * KA * GAMMA_SOIL * (H_STEM**2)
+    vu_stem = 1.6 * pa_stem
+    mu_stem = 1.6 * pa_stem * (H_STEM / 3.0)
     d_stem = x3 - COVER
 
     # Heel at back of stem
     w_heel_total = 1.2 * (GAMMA_SOIL * H_STEM + GAMMA_CONC * t_base_m)
-    Vu_heel = w_heel_total * (l_heel / 1000.0)
-    Mu_heel = w_heel_total * ((l_heel / 1000.0) ** 2 / 2.0)
+    vu_heel = w_heel_total * (l_heel / 1000.0)
+    mu_heel = w_heel_total * ((l_heel / 1000.0) ** 2 / 2.0)
     d_base = x5 - COVER
 
     # Rebars
     db_s = DIAMS[idx_stem_dia]
-    As_s = float(n_s) * math.pi * (db_s**2) / 4.0
+    as_s = float(n_s) * math.pi * (db_s**2) / 4.0
 
     db_b = DIAMS[idx_base_dia]
-    As_b = float(n_b) * math.pi * (db_b**2) / 4.0
+    as_b = float(n_b) * math.pi * (db_b**2) / 4.0
 
     # --- Structural Penalties (g_i <= 0) ---
     beta1 = get_beta1(fc)
     rho_min = max(0.25 * math.sqrt(fc) / FY_MPA, 1.4 / FY_MPA)
     rho_max = 0.85 * beta1 * (fc / FY_MPA) * (3.0 / 8.0)
 
-    def check_aci(M_u, V_u, d_eff, A_s, d_b, n):
-        phi_Vc = 0.75 * 0.17 * math.sqrt(fc) * WIDTH_B * (d_eff / 1000.0)
-        a = (A_s * FY_MPA) / (0.85 * fc * WIDTH_B)
-        phi_Mn = 0.9 * A_s * FY_MPA * max(0.1, d_eff - a / 2.0) * 1e-6
-        rho = A_s / (WIDTH_B * d_eff)
+    def check_aci(m_u, v_u, d_eff, a_s, d_b, n):
+        phi_vc = 0.75 * 0.17 * math.sqrt(fc) * WIDTH_B * (d_eff / 1000.0)
+        a = (a_s * FY_MPA) / (0.85 * fc * WIDTH_B)
+        phi_mn = 0.9 * a_s * FY_MPA * max(0.1, d_eff - a / 2.0) * 1e-6
+        rho = a_s / (WIDTH_B * d_eff)
         # Spacing
         s_available = (WIDTH_B - 2.0 * COVER - n * d_b) / max(1, n - 1)
         s_min = max(25.0, d_b)
 
-        return [M_u - phi_Mn, V_u - phi_Vc, rho_min - rho, rho - rho_max, s_min - s_available]
+        return [m_u - phi_mn, v_u - phi_vc, rho_min - rho, rho - rho_max, s_min - s_available]
 
     g = [2.5 - fs_overturning, 2.5 - fs_sliding, abs(e) - (x1 / 6000.0)]
-    g.extend(check_aci(Mu_stem, Vu_stem, d_stem, As_s, db_s, n_s))
-    g.extend(check_aci(Mu_heel, Vu_heel, d_base, As_b, db_b, n_b))
+    g.extend(check_aci(mu_stem, vu_stem, d_stem, as_s, db_s, n_s))
+    g.extend(check_aci(mu_heel, vu_heel, d_base, as_b, db_b, n_b))
 
     penalty_value = sum(max(0.0, limit) ** 2 for limit in g) * 1e6
 
     # --- Cost Evaluation ---
     vol_conc = (x1 / 1000.0) * t_base_m + 0.5 * (x3 + x4) / 1000.0 * H_STEM
     cost_conc = (0.5 + 0.02 * fc) * vol_conc
-    cost_steel = 50.0 * (As_s + As_b) / 1000.0
+    cost_steel = 50.0 * (as_s + as_b) / 1000.0
     total_cost = cost_conc + cost_steel
 
     return total_cost, penalty_value

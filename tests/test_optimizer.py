@@ -41,17 +41,17 @@ class TestHarmonyMemory:
     def test_best_min(self):
         mem = self._make_mem("min")
         h, f, p = mem.best()
-        assert f == 0.0
+        assert math.isclose(f, 0.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_best_max(self):
         mem = self._make_mem("max")
         h, f, p = mem.best()
-        assert f == 4.0
+        assert math.isclose(f, 4.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_worst_min(self):
         mem = self._make_mem("min")
         idx = mem.worst_index()
-        assert mem._fitness[idx] == 4.0
+        assert math.isclose(mem._fitness[idx], 4.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_feasible_replaces_infeasible(self):
         mem = HarmonyMemory(size=3, mode="min")
@@ -239,7 +239,7 @@ class TestMinimization:
             return abs(h["n"] - 7.0), 0.0
 
         result = Minimization(space, obj).optimize(memory_size=10, max_iter=200)
-        assert result.best_harmony["n"] == 7.0
+        assert math.isclose(result.best_harmony["n"], 7.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_verbose_prints_iteration_progress(self, capsys):
         space = self._sphere_space()

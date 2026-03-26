@@ -225,30 +225,8 @@ class ConvergencePlotter:
         return self
 
     # --------------------------------------------------------------- render
-    def plot(self, save_path: Optional[Union[str, Path]] = None) -> None:
-        """
-        Render the convergence plot.
-
-        Three scenarios are handled automatically:
-
-        1. **All penalties zero** — only the fitness curve is drawn.
-        2. **No feasible solution found** — only the penalty curve is drawn.
-        3. **Mixed** — penalty is drawn (shifted) up to the feasibility
-           transition point, then fitness takes over.
-
-        Parameters
-        ----------
-        save_path : str | Path | None
-            If given, the figure is saved at 300 DPI.  Otherwise ``plt.show()``
-            is called.
-        """
-        _apply_academic_style()
-
-        if not self.iterations_data:
-            print("No data to plot!")
-            return
-
-        # --- Phase detection ------------------------------------------------
+    def _phase_detection(self) -> Tuple[int, float, bool]:
+        """Detect the first iteration where penalty reaches (close to) zero."""
         first_zero_idx: int = -1
         first_feasible_fitness: float = -1.0
 
@@ -259,128 +237,197 @@ class ConvergencePlotter:
                 break
 
         all_zero: bool = all(np.isclose(r.penalty, 0.0) for r in self.iterations_data)
+        return first_zero_idx, first_feasible_fitness, all_zero
 
+    def _extract_series(
+        self,
+    ) -> Tuple[
+        List[int],
+        List[float],
+        List[float],
+        Optional[float],
+        Optional[float],
+        float,
+        Optional[float],
+    ]:
         iterations = [r.iteration for r in self.iterations_data]
         fitness_values = [r.fitness for r in self.iterations_data]
         penalty_values = [r.penalty for r in self.iterations_data]
 
-        # Pre-compute stats
         min_fitness: Optional[float] = min(fitness_values) if fitness_values else None
         last_fitness: Optional[float] = fitness_values[-1] if fitness_values else None
         max_penalty: float = max(penalty_values) if penalty_values else 0.0
         first_fitness: Optional[float] = fitness_values[0] if fitness_values else None
 
-        # Physical y-values for reference lines
-        y_pen_zero_phys: Optional[float] = 0.0
-        y_pen_max_phys: Optional[float] = max_penalty
+        return (
+            iterations,
+            fitness_values,
+            penalty_values,
+            min_fitness,
+            last_fitness,
+            max_penalty,
+            first_fitness,
+        )
 
-        # --- Build draw series (penalty–fitness alignment) ------------------
+    def _build_draw_series(
+        self,
+        *,
+        all_zero: bool,
+        first_zero_idx: int,
+        first_feasible_fitness: float,
+        fitness_values: List[float],
+        penalty_values: List[float],
+        min_fitness: Optional[float],
+        last_fitness: Optional[float],
+        max_penalty: float,
+    ) -> Tuple[
+        List[Optional[float]], List[Optional[float]], Optional[float], Optional[float], Optional[float], Optional[float]
+    ]:
+        """
+        Build the two draw-series arrays (with None gaps) and update axis/reference stats.
+
+        Returns:
+            penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
+        """
         penalties_draw: List[Optional[float]] = []
         fitness_draw: List[Optional[float]] = []
 
+        y_pen_zero_phys: Optional[float] = 0.0
+        y_pen_max_phys: Optional[float] = max_penalty
+
         if all_zero:
-            # Scenario 1: purely feasible run — no penalty curve
             penalties_draw = [None] * len(self.iterations_data)
             fitness_draw = list(fitness_values)
             y_pen_zero_phys = None
             y_pen_max_phys = None
+            return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
 
-        elif first_zero_idx == -1:
-            # Scenario 2: never reached feasibility — no fitness curve
+        if first_zero_idx == -1:
             penalties_draw = list(penalty_values)
             fitness_draw = [None] * len(self.iterations_data)
-            min_fitness = None
-            last_fitness = None
             y_pen_zero_phys = None
+            y_pen_max_phys = None
+            return penalties_draw, fitness_draw, None, None, y_pen_zero_phys, y_pen_max_phys
 
-        else:
-            # Scenario 3: transition — shift penalties up by first feasible
-            for i, rec in enumerate(self.iterations_data):
-                if i <= first_zero_idx:
-                    penalties_draw.append(rec.penalty + first_feasible_fitness)
-                    fitness_draw.append(None)
-                else:
-                    penalties_draw.append(None)
-                    fitness_draw.append(rec.fitness)
+        for i, rec in enumerate(self.iterations_data):
+            if i <= first_zero_idx:
+                penalties_draw.append(rec.penalty + first_feasible_fitness)
+                fitness_draw.append(None)
+            else:
+                penalties_draw.append(None)
+                fitness_draw.append(rec.fitness)
 
-            y_pen_zero_phys = 0.0 + first_feasible_fitness
-            y_pen_max_phys = max_penalty + first_feasible_fitness
-            min_fitness = last_fitness
+        y_pen_zero_phys = 0.0 + first_feasible_fitness
+        y_pen_max_phys = max_penalty + first_feasible_fitness
+        min_fitness = last_fitness  # match original plotting logic
+        return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
 
-        # --- Figure ---------------------------------------------------------
-        fig, ax1 = plt.subplots(figsize=(12, 6))
-        ax1.set_xlabel(self.x_label)
-
-        valid_fit_iters = [iterations[i] for i, v in enumerate(fitness_draw) if v is not None]
+    def _plot_fitness_curve(
+        self,
+        *,
+        ax1: plt.Axes,
+        iterations: List[int],
+        fitness_draw: List[Optional[float]],
+    ) -> List[float]:
         valid_fit_vals = [v for v in fitness_draw if v is not None]
-
-        if valid_fit_vals:
-            ax1.set_ylabel(self.y_fit_label, color="#2ca02c")
-            ax1.tick_params(axis="y", labelcolor="#2ca02c")
-            ax1.plot(
-                valid_fit_iters,
-                valid_fit_vals,
-                color="#2ca02c",
-                linestyle="-",
-                label=self.y_fit_label,
-                linewidth=2,
-            )
-        else:
+        if not valid_fit_vals:
             ax1.set_ylabel("")
             ax1.set_yticks([])
+            return []
 
-        ax2 = ax1.twinx()
+        valid_fit_iters = [iterations[i] for i, v in enumerate(fitness_draw) if v is not None]
+        ax1.set_ylabel(self.y_fit_label, color="#2ca02c")
+        ax1.tick_params(axis="y", labelcolor="#2ca02c")
+        ax1.plot(
+            valid_fit_iters,
+            valid_fit_vals,
+            color="#2ca02c",
+            linestyle="-",
+            label=self.y_fit_label,
+            linewidth=2,
+        )
+        return valid_fit_vals
+
+    def _plot_penalty_curve(
+        self,
+        *,
+        ax2: plt.Axes,
+        iterations: List[int],
+        penalties_draw: List[Optional[float]],
+        valid_fit_vals: List[float],
+    ) -> List[float]:
+        valid_pen_vals = [v for v in penalties_draw if v is not None]
         if not valid_fit_vals:
             ax2.grid(True, linestyle="--", alpha=0.55)
 
-        valid_pen_iters = [iterations[i] for i, v in enumerate(penalties_draw) if v is not None]
-        valid_pen_vals = [v for v in penalties_draw if v is not None]
-
-        if valid_pen_vals:
-            ax2.set_ylabel(self.y_pen_label, color="#d62728")
-            ax2.tick_params(axis="y", labelcolor="#d62728")
-            ax2.plot(
-                valid_pen_iters,
-                valid_pen_vals,
-                color="#d62728",
-                linestyle="-",
-                label=self.y_pen_label,
-                linewidth=2,
-            )
-        else:
+        if not valid_pen_vals:
             ax2.set_ylabel("")
             ax2.set_yticks([])
+            return []
 
-        # --- Axis scaling ---------------------------------------------------
+        valid_pen_iters = [iterations[i] for i, v in enumerate(penalties_draw) if v is not None]
+        ax2.set_ylabel(self.y_pen_label, color="#d62728")
+        ax2.tick_params(axis="y", labelcolor="#d62728")
+        ax2.plot(
+            valid_pen_iters,
+            valid_pen_vals,
+            color="#d62728",
+            linestyle="-",
+            label=self.y_pen_label,
+            linewidth=2,
+        )
+        return valid_pen_vals
+
+    def _apply_axis_scaling(
+        self,
+        *,
+        ax1: plt.Axes,
+        ax2: plt.Axes,
+        valid_fit_vals: List[float],
+        valid_pen_vals: List[float],
+        min_fitness: Optional[float],
+        first_fitness: Optional[float],
+        all_zero: bool,
+        y_pen_zero_phys: Optional[float],
+        y_pen_max_phys: Optional[float],
+    ) -> None:
         if self.y_lim is not None:
             ax1.set_ylim(*self.y_lim)
             ax2.set_ylim(*self.y_lim)
-        else:
-            all_y: List[float] = []
-            if valid_fit_vals:
-                all_y.extend(valid_fit_vals)
-            if valid_pen_vals:
-                all_y.extend(valid_pen_vals)
-            if min_fitness is not None:
-                all_y.append(min_fitness)
-            if all_zero and first_fitness is not None:
-                all_y.append(first_fitness)
-            if y_pen_zero_phys is not None:
-                all_y.append(y_pen_zero_phys)
-            if y_pen_max_phys is not None:
-                all_y.append(y_pen_max_phys)
+            return
 
-            if all_y:
-                lo, hi = min(all_y), max(all_y)
-                pad = 0.5 if hi == lo else (hi - lo) * 0.05
-                ax1.set_ylim(lo - pad, hi + pad)
-                ax2.set_ylim(lo - pad, hi + pad)
+        all_y: List[float] = []
+        if valid_fit_vals:
+            all_y.extend(valid_fit_vals)
+        if valid_pen_vals:
+            all_y.extend(valid_pen_vals)
+        if min_fitness is not None:
+            all_y.append(min_fitness)
+        if all_zero and first_fitness is not None:
+            all_y.append(first_fitness)
+        if y_pen_zero_phys is not None:
+            all_y.append(y_pen_zero_phys)
+        if y_pen_max_phys is not None:
+            all_y.append(y_pen_max_phys)
 
-        if self.x_lim is not None:
-            ax1.set_xlim(*self.x_lim)
-            ax2.set_xlim(*self.x_lim)
+        if not all_y:
+            return
 
-        # --- Tick formatters (penalty–fitness alignment) --------------------
+        lo, hi = min(all_y), max(all_y)
+        pad = 0.5 if hi == lo else (hi - lo) * 0.05
+        ax1.set_ylim(lo - pad, hi + pad)
+        ax2.set_ylim(lo - pad, hi + pad)
+
+    def _configure_tick_formatters(
+        self,
+        *,
+        ax1: plt.Axes,
+        ax2: plt.Axes,
+        first_zero_idx: int,
+        first_feasible_fitness: float,
+        all_zero: bool,
+        valid_fit_vals: List[float],
+    ) -> None:
         _fzidx = first_zero_idx
         _fffit = first_feasible_fitness if first_zero_idx != -1 else None
         _allz = all_zero
@@ -403,7 +450,18 @@ class ConvergencePlotter:
         if valid_fit_vals:
             ax1.yaxis.set_major_formatter(mticker.FuncFormatter(_fitness_formatter))
 
-        # --- Reference lines ------------------------------------------------
+    def _draw_reference_lines(
+        self,
+        *,
+        ax1: plt.Axes,
+        ax2: plt.Axes,
+        first_zero_idx: int,
+        all_zero: bool,
+        first_feasible_fitness: float,
+        min_fitness: Optional[float],
+        last_fitness: Optional[float],
+        y_pen_zero_phys: Optional[float],
+    ) -> None:
         if first_zero_idx != -1 and not all_zero and first_feasible_fitness is not None:
             ax1.axhline(
                 first_feasible_fitness,
@@ -444,23 +502,22 @@ class ConvergencePlotter:
                     alpha=0.6,
                 )
 
-        ax1.set_title(self.title, pad=15)
-
-        # --- Unified legend -------------------------------------------------
+    def _draw_legend(self, *, ax1: plt.Axes, ax2: plt.Axes) -> None:
         lines1, labels1 = ax1.get_legend_handles_labels()
         lines2, labels2 = ax2.get_legend_handles_labels()
         all_lines = lines1 + lines2
+        if not all_lines:
+            return
         all_labels = labels1 + labels2
-        if all_lines:
-            ax2.legend(
-                all_lines,
-                all_labels,
-                loc="upper right",
-                framealpha=0.85,
-                edgecolor="#cccccc",
-            )
+        ax2.legend(
+            all_lines,
+            all_labels,
+            loc="upper right",
+            framealpha=0.85,
+            edgecolor="#cccccc",
+        )
 
-        # --- User-defined info boxes ----------------------------------------
+    def _draw_info_boxes(self, *, fig: plt.Figure, ax2: plt.Axes) -> None:
         for box in self.text_boxes:
             fig.text(
                 box.x,
@@ -479,8 +536,113 @@ class ConvergencePlotter:
                 ),
             )
 
-        fig.tight_layout()
+    def plot(self, save_path: Optional[Union[str, Path]] = None) -> None:
+        """
+        Render the convergence plot.
 
+        Three scenarios are handled automatically:
+
+        1. **All penalties zero** — only the fitness curve is drawn.
+        2. **No feasible solution found** — only the penalty curve is drawn.
+        3. **Mixed** — penalty is drawn (shifted) up to the feasibility
+           transition point, then fitness takes over.
+
+        Parameters
+        ----------
+        save_path : str | Path | None
+            If given, the figure is saved at 300 DPI.  Otherwise ``plt.show()``
+            is called.
+        """
+        _apply_academic_style()
+        if not self.iterations_data:
+            print("No data to plot!")
+            return
+
+        first_zero_idx, first_feasible_fitness, all_zero = self._phase_detection()
+        (
+            iterations,
+            fitness_values,
+            penalty_values,
+            min_fitness,
+            last_fitness,
+            max_penalty,
+            first_fitness,
+        ) = self._extract_series()
+
+        (
+            penalties_draw,
+            fitness_draw,
+            min_fitness,
+            last_fitness,
+            y_pen_zero_phys,
+            y_pen_max_phys,
+        ) = self._build_draw_series(
+            all_zero=all_zero,
+            first_zero_idx=first_zero_idx,
+            first_feasible_fitness=first_feasible_fitness,
+            fitness_values=fitness_values,
+            penalty_values=penalty_values,
+            min_fitness=min_fitness,
+            last_fitness=last_fitness,
+            max_penalty=max_penalty,
+        )
+
+        fig, ax1 = plt.subplots(figsize=(12, 6))
+        ax1.set_xlabel(self.x_label)
+        ax2 = ax1.twinx()
+
+        valid_fit_vals = self._plot_fitness_curve(
+            ax1=ax1,
+            iterations=iterations,
+            fitness_draw=fitness_draw,
+        )
+        valid_pen_vals = self._plot_penalty_curve(
+            ax2=ax2,
+            iterations=iterations,
+            penalties_draw=penalties_draw,
+            valid_fit_vals=valid_fit_vals,
+        )
+
+        self._apply_axis_scaling(
+            ax1=ax1,
+            ax2=ax2,
+            valid_fit_vals=valid_fit_vals,
+            valid_pen_vals=valid_pen_vals,
+            min_fitness=min_fitness,
+            first_fitness=first_fitness,
+            all_zero=all_zero,
+            y_pen_zero_phys=y_pen_zero_phys,
+            y_pen_max_phys=y_pen_max_phys,
+        )
+
+        if self.x_lim is not None:
+            ax1.set_xlim(*self.x_lim)
+            ax2.set_xlim(*self.x_lim)
+
+        self._configure_tick_formatters(
+            ax1=ax1,
+            ax2=ax2,
+            first_zero_idx=first_zero_idx,
+            first_feasible_fitness=first_feasible_fitness,
+            all_zero=all_zero,
+            valid_fit_vals=valid_fit_vals,
+        )
+        self._draw_reference_lines(
+            ax1=ax1,
+            ax2=ax2,
+            first_zero_idx=first_zero_idx,
+            all_zero=all_zero,
+            first_feasible_fitness=first_feasible_fitness,
+            min_fitness=min_fitness,
+            last_fitness=last_fitness,
+            y_pen_zero_phys=y_pen_zero_phys,
+        )
+
+        ax1.set_title(self.title, pad=15)
+        self._draw_legend(ax1=ax1, ax2=ax2)
+        self._draw_info_boxes(fig=fig, ax2=ax2)
+
+        fig.tight_layout()
         if save_path:
             plt.savefig(str(save_path), dpi=300, bbox_inches="tight")
             plt.close(fig)
@@ -540,7 +702,7 @@ def plot_multi_run_convergence(
     std = fitness_matrix.std(axis=0)
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=(12, 6))
+        _, ax = plt.subplots(figsize=(12, 6))
         ax.set_title(title, pad=15)
         owns_figure = True
     else:

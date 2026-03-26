@@ -119,8 +119,8 @@ def _compute_r_min(
         R_min to full machine precision.
     """
 
-    def f(R: float) -> float:
-        return math.pi * R**2 * (l_max + 4.0 * R / 3.0) - volume
+    def f(r: float) -> float:
+        return math.pi * r**2 * (l_max + 4.0 * r / 3.0) - volume
 
     # Bracket: f(0) = -volume < 0;  f(R_upper) >> 0 for any sane problem
     lo, hi = 0.0, R_UPPER
@@ -135,7 +135,7 @@ def _compute_r_min(
     return hi  # conservative (slightly above true root)
 
 
-def _l_min_from_volume(R: float, volume: float) -> float:
+def _l_min_from_volume(r: float, volume: float) -> float:
     """
     Invert the volume equation for the minimum cylindrical length.
 
@@ -156,11 +156,11 @@ def _l_min_from_volume(R: float, volume: float) -> float:
     float
         Lower bound for L.
     """
-    head_volume: float = (4.0 / 3.0) * math.pi * R**3
+    head_volume: float = (4.0 / 3.0) * math.pi * r**3
     remaining: float = volume - head_volume
     if remaining <= 0.0:
         return L_LOWER  # heads alone satisfy volume
-    return max(L_LOWER, remaining / (math.pi * R**2))
+    return max(L_LOWER, remaining / (math.pi * r**2))
 
 
 # ---------------------------------------------------------------------------
@@ -233,12 +233,12 @@ def objective(harmony: Dict[str, Any]) -> Tuple[float, float]:
     3.1661 · Ts² · L       — longitudinal shell forming
     19.84  · Ts² · R       — circumferential shell forming
     """
-    R: float = harmony["R"]
-    Ts: float = harmony["Ts"]
-    Th: float = harmony["Th"]
-    L: float = harmony["L"]
+    r: float = harmony["R"]
+    ts: float = harmony["Ts"]
+    th: float = harmony["Th"]
+    l: float = harmony["L"]
 
-    cost: float = 0.6224 * Ts * R * L + 1.7781 * Th * R**2 + 3.1661 * Ts**2 * L + 19.84 * Ts**2 * R
+    cost: float = 0.6224 * ts * r * l + 1.7781 * th * r**2 + 3.1661 * ts**2 * l + 19.84 * ts**2 * r
 
     return cost, 0.0
 
@@ -287,10 +287,7 @@ def main() -> None:
     plotter = ConvergencePlotter(OUTPUT_DIR / "history_data.csv")
     plotter.set_labels(title="Pressure Vessel — Full Parametric Extreme")
     plotter.add_info_box(
-        f"Cost: {result.best_fitness:.2f}\n"
-        f"Penalty: {result.best_penalty:.4f}\n"
-        f"R_min: {R_MIN:.2f} in\n"
-        f"Time: {t_elapsed:.2f}s"
+        f"Cost: {result.best_fitness:.2f}\nPenalty: {result.best_penalty:.4f}\nR_min: {R_MIN:.2f} in\nTime: {t_elapsed:.2f}s"
     )
     plotter.plot(save_path=OUTPUT_DIR / "convergence.png")
 
