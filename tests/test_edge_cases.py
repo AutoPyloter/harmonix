@@ -459,7 +459,7 @@ class TestSerializationIntegrity:
                 checkpoint_every=200,
                 resume="auto",
             )
-            assert len(r2.front) >= 0
+            assert len(r2.front) > 0
         finally:
             ckpt.unlink(missing_ok=True)
 

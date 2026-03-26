@@ -280,34 +280,29 @@ class ConvergencePlotter:
         min_fitness: Optional[float],
         last_fitness: Optional[float],
         max_penalty: float,
-    ) -> Tuple[
-        List[Optional[float]], List[Optional[float]], Optional[float], Optional[float], Optional[float], Optional[float]
-    ]:
+    ) -> Tuple[List[Optional[float]], List[Optional[float]], Optional[float], Optional[float], Optional[float]]:
         """
         Build the two draw-series arrays (with None gaps) and update axis/reference stats.
 
         Returns:
-            penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
+            penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys
         """
         penalties_draw: List[Optional[float]] = []
         fitness_draw: List[Optional[float]] = []
 
         y_pen_zero_phys: Optional[float] = 0.0
-        y_pen_max_phys: Optional[float] = max_penalty
 
         if all_zero:
             penalties_draw = [None] * len(self.iterations_data)
             fitness_draw = list(fitness_values)
             y_pen_zero_phys = None
-            y_pen_max_phys = None
-            return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
+            return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys
 
         if first_zero_idx == -1:
             penalties_draw = list(penalty_values)
             fitness_draw = [None] * len(self.iterations_data)
             y_pen_zero_phys = None
-            y_pen_max_phys = None
-            return penalties_draw, fitness_draw, None, None, y_pen_zero_phys, y_pen_max_phys
+            return penalties_draw, fitness_draw, None, None, y_pen_zero_phys
 
         for i, rec in enumerate(self.iterations_data):
             if i <= first_zero_idx:
@@ -318,9 +313,8 @@ class ConvergencePlotter:
                 fitness_draw.append(rec.fitness)
 
         y_pen_zero_phys = 0.0 + first_feasible_fitness
-        y_pen_max_phys = max_penalty + first_feasible_fitness
         min_fitness = last_fitness  # match original plotting logic
-        return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys, y_pen_max_phys
+        return penalties_draw, fitness_draw, min_fitness, last_fitness, y_pen_zero_phys
 
     def _plot_fitness_curve(
         self,
@@ -389,7 +383,6 @@ class ConvergencePlotter:
         first_fitness: Optional[float],
         all_zero: bool,
         y_pen_zero_phys: Optional[float],
-        y_pen_max_phys: Optional[float],
     ) -> None:
         if self.y_lim is not None:
             ax1.set_ylim(*self.y_lim)
@@ -407,8 +400,6 @@ class ConvergencePlotter:
             all_y.append(first_fitness)
         if y_pen_zero_phys is not None:
             all_y.append(y_pen_zero_phys)
-        if y_pen_max_phys is not None:
-            all_y.append(y_pen_max_phys)
 
         if not all_y:
             return
@@ -428,9 +419,14 @@ class ConvergencePlotter:
         all_zero: bool,
         valid_fit_vals: List[float],
     ) -> None:
+        self._set_ax2_formatter(ax2, first_zero_idx, first_feasible_fitness)
+        if valid_fit_vals:
+            self._set_ax1_formatter(ax1, first_zero_idx, first_feasible_fitness, all_zero)
+
+    def _set_ax2_formatter(self, ax2: plt.Axes, first_zero_idx: int, first_feasible_fitness: float) -> None:
+        """Isolated formatter assignment to satisfy complexity check."""
         _fzidx = first_zero_idx
         _fffit = first_feasible_fitness if first_zero_idx != -1 else None
-        _allz = all_zero
 
         def _penalty_formatter(x: float, _pos: int) -> str:
             if _fzidx == -1:
@@ -441,14 +437,21 @@ class ConvergencePlotter:
 
         ax2.yaxis.set_major_formatter(mticker.FuncFormatter(_penalty_formatter))
 
+    def _set_ax1_formatter(
+        self, ax1: plt.Axes, first_zero_idx: int, first_feasible_fitness: float, all_zero: bool
+    ) -> None:
+        """Isolated formatter assignment to satisfy complexity check."""
+        _fzidx = first_zero_idx
+        _fffit = first_feasible_fitness if first_zero_idx != -1 else None
+        _allz = all_zero
+
         def _fitness_formatter(x: float, _pos: int) -> str:
             if _fzidx != -1 and not _allz and _fffit is not None:
                 if x > _fffit + 1e-5:
                     return ""
             return f"{x:.2f}"
 
-        if valid_fit_vals:
-            ax1.yaxis.set_major_formatter(mticker.FuncFormatter(_fitness_formatter))
+        ax1.yaxis.set_major_formatter(mticker.FuncFormatter(_fitness_formatter))
 
     def _draw_reference_lines(
         self,
@@ -527,13 +530,13 @@ class ConvergencePlotter:
                 fontsize=9,
                 verticalalignment="bottom",
                 horizontalalignment="right",
-                bbox=dict(
-                    boxstyle="round,pad=0.5",
-                    fc=box.facecolor,
-                    alpha=box.alpha,
-                    ec="k",
-                    lw=0.7,
-                ),
+                bbox={
+                    "boxstyle": "round,pad=0.5",
+                    "fc": box.facecolor,
+                    "alpha": box.alpha,
+                    "ec": "k",
+                    "lw": 0.7,
+                },
             )
 
     def plot(self, save_path: Optional[Union[str, Path]] = None) -> None:
@@ -575,7 +578,6 @@ class ConvergencePlotter:
             min_fitness,
             last_fitness,
             y_pen_zero_phys,
-            y_pen_max_phys,
         ) = self._build_draw_series(
             all_zero=all_zero,
             first_zero_idx=first_zero_idx,
@@ -612,7 +614,6 @@ class ConvergencePlotter:
             first_fitness=first_fitness,
             all_zero=all_zero,
             y_pen_zero_phys=y_pen_zero_phys,
-            y_pen_max_phys=y_pen_max_phys,
         )
 
         if self.x_lim is not None:

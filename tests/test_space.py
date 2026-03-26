@@ -9,6 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from typing import Any, cast
+
 import pytest
 
 from harmonix.space import DesignSpace
@@ -53,7 +55,7 @@ class TestDesignSpaceConstruction:
     def test_add_wrong_type_raises(self):
         space = DesignSpace()
         with pytest.raises(TypeError):
-            space.add("x", 42)
+            space.add("x", cast(Any, 42))
 
     def test_repr(self):
         space = DesignSpace()

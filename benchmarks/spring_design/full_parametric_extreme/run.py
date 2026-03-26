@@ -93,38 +93,38 @@ SURGE_TERM_COEFF: float = 5108.0  # g2 second-term coefficient
 # ---------------------------------------------------------------------------
 # Parametric helpers — derived from constants, NO magic numbers
 # ---------------------------------------------------------------------------
-def _d_max_from_geometry(diam_limit: float, D_min: float) -> float:
+def _d_max_from_geometry(diam_limit: float, d_min: float) -> float:
     """
     Maximum wire diameter that allows at least the minimum coil diameter.
 
         g4:  d + D ≤ diam_limit
-        ∴    d ≤ diam_limit − D_min
+        ∴    d ≤ diam_limit − d_min
     """
-    return diam_limit - D_min
+    return diam_limit - d_min
 
 
-def _n_min_shear(d: float, D: float) -> float:
+def _n_min_shear(d: float, coil_diam: float) -> float:
     """
     Minimum active coils from the shear-stress constraint (g1).
 
         g1:  1 − D³·N / (SHEAR_COEFF · d⁴) ≤ 0
         ∴    N ≥ SHEAR_COEFF · d⁴ / D³
     """
-    if D <= 0:
+    if coil_diam <= 0:
         return N_MAX
-    return (SHEAR_COEFF * d**4) / (D**3)
+    return (SHEAR_COEFF * d**4) / (coil_diam**3)
 
 
-def _n_min_deflection(d: float, D: float) -> float:
+def _n_min_deflection(d: float, coil_diam: float) -> float:
     """
     Minimum active coils from the deflection constraint (g3).
 
         g3:  1 − DEFL_COEFF · d / (D² · N) ≤ 0
         ∴    N ≥ DEFL_COEFF · d / D²
     """
-    if D <= 0:
+    if coil_diam <= 0:
         return N_MAX
-    return (DEFL_COEFF * d) / (D**2)
+    return (DEFL_COEFF * d) / (coil_diam**2)
 
 
 # ---------------------------------------------------------------------------

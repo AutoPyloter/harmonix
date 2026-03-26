@@ -40,5 +40,8 @@ iteration_results.txt
 Thumbs.db
 
 # Jupyter
-.ipynb_checkpoints/
 *.ipynb
+.ipynb_checkpoints/
+
+# Hypothesis
+.hypothesis/

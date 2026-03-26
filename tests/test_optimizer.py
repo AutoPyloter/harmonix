@@ -11,6 +11,8 @@ import random
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
@@ -40,12 +42,12 @@ class TestHarmonyMemory:
 
     def test_best_min(self):
         mem = self._make_mem("min")
-        h, f, p = mem.best()
+        _, f, p = mem.best()
         assert math.isclose(f, 0.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_best_max(self):
         mem = self._make_mem("max")
-        h, f, p = mem.best()
+        _, f, p = mem.best()
         assert math.isclose(f, 4.0, rel_tol=0.0, abs_tol=1e-12)
 
     def test_worst_min(self):
@@ -80,8 +82,8 @@ class TestHarmonyMemory:
         mem = self._make_mem()
         data = mem.to_dict()
         mem2 = HarmonyMemory.from_dict(data)
-        h1, f1, p1 = mem.best()
-        h2, f2, p2 = mem2.best()
+        _, f1, _ = mem.best()
+        _, f2, _ = mem2.best()
         assert f1 == f2
 
 
@@ -107,11 +109,8 @@ class TestHarmonySearchOptimizerBase:
         space = DesignSpace()
         space.add("x", Continuous(0.0, 1.0))
         opt = HarmonySearchOptimizer(space, lambda h: (h["x"], 0.0))
-        try:
+        with pytest.raises(NotImplementedError):
             opt.optimize()
-            assert False, "Expected NotImplementedError"
-        except NotImplementedError:
-            assert True
 
 
 # ---------------------------------------------------------------------------

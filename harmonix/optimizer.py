@@ -435,6 +435,54 @@ class HarmonySearchOptimizer(ABC):
 
         return start_iter, logger, effective_obj
 
+    def _perform_iteration(
+        self,
+        *,
+        it: int,
+        start_iter: int,
+        max_iter: int,
+        bw_max: float,
+        bw_min: float,
+        hmcr: float,
+        par: float,
+        effective_obj: Callable,
+        logger: RunLogger,
+        history: List[Tuple[Fitness, Penalty]],
+        verbose: bool,
+        callback: Optional[Callable],
+        ckpt: Optional[Path],
+        checkpoint_every: int,
+        t0: float,
+    ) -> None:
+        """Single step of the improvisation loop."""
+        bw = self._compute_bw(it - start_iter, max_iter - start_iter, bw_max, bw_min)
+        new_h = self._improvise(hmcr, par, bw)
+        new_f, new_p = effective_obj(new_h)
+        new_f, new_p = float(new_f), float(new_p)
+        self._memory.try_replace_worst(new_h, new_f, new_p)
+
+        best_h, best_f, best_p = self._memory.best()
+        history.append((best_f, best_p))
+        logger.log_evaluation(it + 1, new_h, new_f, new_p)
+        logger.log_iteration(it + 1, best_h, best_f, best_p)
+
+        if verbose:
+            print(f"[HS] iter {it + 1:>6d} | fitness = {best_f:.6g} | penalty = {best_p:.4g}")
+
+        if callback is not None:
+            partial = OptimizationResult(
+                best_harmony=best_h,
+                best_fitness=best_f,
+                best_penalty=best_p,
+                iterations=it + 1,
+                elapsed_seconds=time.perf_counter() - t0,
+                history=history,
+            )
+            callback(it + 1, partial)
+
+        if ckpt and (it + 1) % checkpoint_every == 0:
+            self.save_checkpoint(ckpt, it + 1)
+
     # --- checkpoint --------------------------------------------------------
 
     def save_checkpoint(self, path: Path, iteration: int) -> None:
@@ -443,7 +491,9 @@ class HarmonySearchOptimizer(ABC):
             "iteration": iteration,
             "memory": self._memory.to_dict() if self._memory else None,
         }
-        Path(path).write_text(json.dumps(payload, indent=2))
+        # Path resolution for security compliance
+        target_path = Path(path).resolve()
+        target_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     def load_checkpoint(self, path: Path) -> int:
         """Restore memory from JSON checkpoint.  Returns last completed iteration."""
@@ -585,34 +635,23 @@ class Minimization(HarmonySearchOptimizer):
 
         try:
             for it in range(start_iter, max_iter):
-                bw = self._compute_bw(it - start_iter, max_iter - start_iter, bw_max, bw_min)
-                new_h = self._improvise(hmcr, par, bw)
-                new_f, new_p = effective_obj(new_h)
-                new_f, new_p = float(new_f), float(new_p)
-                self._memory.try_replace_worst(new_h, new_f, new_p)
-
-                best_h, best_f, best_p = self._memory.best()
-                history.append((best_f, best_p))
-                logger.log_evaluation(it + 1, new_h, new_f, new_p)
-                logger.log_iteration(it + 1, best_h, best_f, best_p)
-
-                if verbose:
-                    print(f"[HS] iter {it + 1:>6d} | fitness = {best_f:.6g} | penalty = {best_p:.4g}")
-
-                if callback is not None:
-                    partial = OptimizationResult(
-                        best_harmony=best_h,
-                        best_fitness=best_f,
-                        best_penalty=best_p,
-                        iterations=it + 1,
-                        elapsed_seconds=time.perf_counter() - t0,
-                        history=history,
-                    )
-                    callback(it + 1, partial)
-
-                if ckpt and (it + 1) % checkpoint_every == 0:
-                    self.save_checkpoint(ckpt, it + 1)
-
+                self._perform_iteration(
+                    it=it,
+                    start_iter=start_iter,
+                    max_iter=max_iter,
+                    bw_max=bw_max,
+                    bw_min=bw_min,
+                    hmcr=hmcr,
+                    par=par,
+                    effective_obj=effective_obj,
+                    logger=logger,
+                    history=history,
+                    verbose=verbose,
+                    callback=callback,
+                    ckpt=ckpt,
+                    checkpoint_every=checkpoint_every,
+                    t0=t0,
+                )
         except StopIteration:
             pass
 
@@ -934,25 +973,20 @@ class MultiObjective(HarmonySearchOptimizer):
     def _mo_iteration_update(
         self,
         *,
-        it: int,
-        start_iter: int,
-        max_iter: int,
-        hmcr: float,
-        par: float,
-        bw_max: float,
-        bw_min: float,
+        it_info: Dict[str, Any],
+        params: Dict[str, Any],
         archive: ParetoArchive,
         effective_obj: Callable,
-        callback: Optional[Callable[[int, ParetoResult], None]],
-        verbose: bool,
-        ckpt: Optional[Path],
-        checkpoint_every: int,
         logger: RunLogger,
         archive_history: List[int],
         t0: float,
     ) -> None:
-        bw = self._compute_bw(it - start_iter, max_iter - start_iter, bw_max, bw_min)
-        new_h = self._mo_improvise_new_h(archive=archive, hmcr=hmcr, par=par, bw=bw)
+        it = it_info["it"]
+        start_iter = it_info["start_iter"]
+        max_iter = it_info["max_iter"]
+
+        bw = self._compute_bw(it - start_iter, max_iter - start_iter, params["bw_max"], params["bw_min"])
+        new_h = self._mo_improvise_new_h(archive=archive, hmcr=params["hmcr"], par=params["par"], bw=bw)
         objs, p = self._mo_evaluate_new_h(effective_obj=effective_obj, new_h=new_h)
 
         self._mo_update_memory_and_archive(new_h=new_h, objs=objs, p=p, archive=archive)
@@ -967,13 +1001,13 @@ class MultiObjective(HarmonySearchOptimizer):
             p=p,
             archive=archive,
             archive_history=archive_history,
-            callback=callback,
-            verbose=verbose,
+            callback=params.get("callback"),
+            verbose=params.get("verbose", False),
             t0=t0,
         )
         self._mo_maybe_checkpoint(
-            ckpt=ckpt,
-            checkpoint_every=checkpoint_every,
+            ckpt=params.get("ckpt"),
+            checkpoint_every=params.get("checkpoint_every", 500),
             it_plus_1=it_plus_1,
             archive=archive,
         )
@@ -1081,22 +1115,26 @@ class MultiObjective(HarmonySearchOptimizer):
         archive_history: List[int] = []
         t0 = time.perf_counter()
 
+        it_info = {"start_iter": start_iter, "max_iter": max_iter}
+        params = {
+            "hmcr": hmcr,
+            "par": par,
+            "bw_max": bw_max,
+            "bw_min": bw_min,
+            "callback": callback,
+            "verbose": verbose,
+            "ckpt": ckpt,
+            "checkpoint_every": checkpoint_every,
+        }
+
         try:
             for it in range(start_iter, max_iter):
+                it_info["it"] = it
                 self._mo_iteration_update(
-                    it=it,
-                    start_iter=start_iter,
-                    max_iter=max_iter,
-                    hmcr=hmcr,
-                    par=par,
-                    bw_max=bw_max,
-                    bw_min=bw_min,
+                    it_info=it_info,
+                    params=params,
                     archive=archive,
                     effective_obj=effective_obj,
-                    callback=callback,
-                    verbose=verbose,
-                    ckpt=ckpt,
-                    checkpoint_every=checkpoint_every,
                     logger=logger,
                     archive_history=archive_history,
                     t0=t0,

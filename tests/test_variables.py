@@ -272,11 +272,12 @@ class TestContinuousValidation:
 
     def test_lo_eq_hi_does_not_raise(self):
         v = Continuous(3.0, 3.0)
-        assert v is not None
+        assert isinstance(v, Continuous)
 
     def test_callable_lo_no_validation_at_init(self):
         """Callable bounds skip init validation — no error."""
         v = Continuous(lo=lambda ctx: 999.0, hi=1.0)
+        assert isinstance(v, Continuous)
         assert v is not None
 
     def test_lo_gt_hi_error_contains_values(self):
@@ -408,7 +409,7 @@ class TestDiscreteValidation:
             step=1.0,
             hi=lambda ctx: ctx["x"] + 5,
         )
-        assert v is not None
+        assert isinstance(v, Discrete)
 
     def test_step_error_message_mentions_step(self):
         with pytest.raises(ValueError) as exc:
@@ -597,7 +598,7 @@ class TestCategoricalValidation:
 
     def test_single_element_valid(self):
         v = Categorical([42])
-        assert v is not None
+        assert isinstance(v, Categorical)
 
 
 # ===========================================================================
