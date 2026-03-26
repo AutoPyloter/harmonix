@@ -3,7 +3,7 @@
 <p align="left">
   <a href="https://pypi.org/project/pyhsds/"><img src="https://img.shields.io/pypi/v/pyhsds?style=flat-square&color=blue&v=1" alt="PyPI Version"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=flat-square" alt="Python Versions"></a>
-  <a href="https://pypi.org/project/pyhsds/"><img src="https://img.shields.io/pypi/wheel/pyhsds?style=flat-square&color=blue" alt="PyPI Wheel"></a>
+  <a href="https://pypi.org/project/pyhsds/"><img src="https://img.shields.io/pypi/wheel/pyhsds?style=flat-square&color=blue&v=1" alt="PyPI Wheel"></a>
   <br>
 
   <a href="https://github.com/AutoPyloter/hsds/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/AutoPyloter/hsds/ci.yml?branch=main&label=CI&style=flat-square" alt="CI Status"></a>
