@@ -405,7 +405,7 @@ harmonix/
 If you use `harmonix-opt` in your research, please cite it as follows:
 
 **APA:**
-> Özcan, A. (2026). harmonix-opt: Harmony Search optimisation with dependent variable spaces (Version 1.0.1) [Computer software]. https://doi.org/10.5281/zenodo.19160019
+> Özcan, A. (2026). harmonix-opt: Harmony Search optimisation with dependent variable spaces (Version 1.0.2) [Computer software]. https://doi.org/10.5281/zenodo.19160019
 
 **BibTeX:**
 ```bibtex
@@ -415,9 +415,9 @@ If you use `harmonix-opt` in your research, please cite it as follows:
   month        = mar,
   year         = 2026,
   publisher    = {Zenodo},
-  version      = {1.0.1},
+  version      = {1.0.2},
   doi          = {10.5281/zenodo.19160019},
-  url          = {[https://doi.org/10.5281/zenodo.19160019](https://doi.org/10.5281/zenodo.19160019)}
+  url          = {https://doi.org/10.5281/zenodo.19160019}
 }
 ```
 
