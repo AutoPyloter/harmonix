@@ -101,9 +101,10 @@ def crowding_distances(
     distances = [0.0] * n
 
     for m in range(n_obj):
-        # Sort by objective m
-        # Keep the key lambda single-argument so mypy can infer the type of `i`.
-        order = sorted(range(n), key=lambda i, m=m: objective_vectors[i][m])
+        # Sort indices by objective m values
+        indexed_vals = [(objective_vectors[i][m], i) for i in range(n)]
+        indexed_vals.sort()
+        order = [iv[1] for iv in indexed_vals]
         f_min = objective_vectors[order[0]][m]
         f_max = objective_vectors[order[-1]][m]
         span = f_max - f_min
